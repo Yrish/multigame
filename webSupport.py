@@ -32,6 +32,13 @@ class webSupport:
             req[key] = get[key]
         return req
 
+    def buildFile(**kwords):
+        path = kwords.get("path", None)
+        data = kwords.get("data", "")
+        if path == None:
+            return "Unknown Path"
+        open(str(path), "w")
+
 url = 'https://python-brysen.c9users.io/'
 webSupport.startSession()
 r = webSupport.get(url)
@@ -52,4 +59,4 @@ print(req.text)
 req = webSupport.buildRequests({}, webSupport.buildRequest("world", world_name="tester"))
 print(req, end="\n*****************")
 
-print(requests.post(url, data={"method":"REQUEST","data":json.dumps(req)}).text)
+res = requests.post(url, data={"method":"REQUEST","data":json.dumps(req)}).text
