@@ -1,0 +1,3 @@
+class Handler:
+
+    serverURL = None
