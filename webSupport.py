@@ -3,6 +3,8 @@ import json
 
 class webSupport:
 
+    url = 'https://python-brysen.c9users.io/'
+
     def startSession():
         webSupport.s = requests.Session()
 
@@ -39,6 +41,11 @@ class webSupport:
             return "Unknown Path"
         open(str(path), "w")
 
+    def authenticate(username, password):
+        req = {"method":"AUTHENTICATE","data":json.dumps({"username":username,"password":password})}
+        return requests.post(webSupport.url, data=req)
+        
+
 url = 'https://python-brysen.c9users.io/'
 webSupport.startSession()
 r = webSupport.get(url)
@@ -60,3 +67,4 @@ req = webSupport.buildRequests({}, webSupport.buildRequest("world", world_name="
 print(req, end="\n*****************")
 
 res = requests.post(url, data={"method":"REQUEST","data":json.dumps(req)}).text
+print(webSupport.authenticate("user","password").text)

@@ -15,4 +15,5 @@ print(Handler.serverURL)
 print(Handler.mainPath)
 print(Handler.graphicPath)
 print(Handler.soundPath)
+print(Handler.os_type)
         
