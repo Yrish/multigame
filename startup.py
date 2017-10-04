@@ -17,4 +17,9 @@ class StartUp:
         os_type = None
         if "win" in sys.platform:
             os_type = "windows"
-        Handler.os_type = "windows"
+        elif "linux" == sys.platform:
+            if os.uname()[1] == "raspberrypi":
+                os_type = "raspi"
+            else:
+                os_type = "linux"
+        Handler.os_type = os_type
