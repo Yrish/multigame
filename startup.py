@@ -13,6 +13,7 @@ class StartUp:
         Handler.mainPath = os.getcwd() + os.sep
         Handler.graphicPath = os.getcwd() + os.sep + "assets" + os.sep + "graphics" + os.sep
         Handler.soundPath = os.getcwd() + os.sep + "assets" + os.sep + "sounds" + os.sep
+        Handler.entitiesPath = Handler.mainPath + os.sep + "entities" + os.sep
         #assign operating system
         os_type = None
         if "win" in sys.platform:
@@ -23,3 +24,4 @@ class StartUp:
             else:
                 os_type = "linux"
         Handler.os_type = os_type
+        sys.path.append(Handler.entitiesPath)
