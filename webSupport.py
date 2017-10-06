@@ -1,21 +1,25 @@
 import requests
 import json
+import time
 
-class webSupport:
+class WebSupport:
 
     url = 'https://python-brysen.c9users.io/'
+    username = None
+    authToken = None
+    s = None
 
     def startSession():
-        webSupport.s = requests.Session()
+        WebSupport.s = requests.Session()
 
     def get(url):
-        return webSupport.s.get(url).text
+        return WebSupport.s.get(url).text
 
     def update(url, json):
-        webSupport.s.get(url, params={'update':json})
+        WebSupport.s.get(url, params={'update':json})
 
     def __import__():
-        webSupport.startSession()
+        WebSupport.startSession()
 
     def buildData(**kwords):
         data = {"entities":kwords.get("entities", {}), "world":kwords.get("world", {})}
@@ -43,20 +47,38 @@ class webSupport:
 
     def authenticate(username, password):
         req = {"method":"AUTHENTICATE","data":json.dumps({"username":username,"password":password})}
-        return requests.post(webSupport.url, data=req)
+        return WebSupport.s.post(WebSupport.url, data=req)
 
     def login(username, password):
         req = {"method":"LOGIN","data":json.dumps({"username":username,"password":password})}
-        return requests.post(webSupport.url, data=req)
+        ret = WebSupport.s.post(WebSupport.url, data=req)
+        rett = json.loads(ret.text)
+        if rett["login_status"] == True:
+            WebSupport.username = username
+            WebSupport.authToken = rett["authToken"]
+        return ret
+
+    def logout(username):
+        req = WebSupport.__basicLogedInPacket__(method="LOGOUT", data = json.dumps({"username":username}))
+        #req = {"method":"LOGOUT","data":json.dumps({"username":username})}
+        return WebSupport.s.post(WebSupport.url, data=req)
 
     def createAccount(username, password):
-        req = {"method":"CREATEACCOUNT", "data":json.dumps({"username":username,"password":password})}
-        return requests.post(webSupport.url, data=req)
-        
+        req = WebSupport.__basicPacket__(method="CREATEACCOUNT", data = json.dumps({"username":username,"password":password}))
+        return WebSupport.s.post(WebSupport.url, data=req)
+
+    def __basicLogedInPacket__(**kwords):
+        lil = WebSupport.__basicPacket__(**kwords)
+        lil["username"] = kwords.get("username", WebSupport.username)
+        lil["authToken"] = kwords.get("authToken", WebSupport.authToken)
+        return lil
+
+    def __basicPacket__(**kwords):
+        return {"method":kwords.get("method"), "data":kwords.get("data", "{}")}
 
 url = 'https://python-brysen.c9users.io/'
-webSupport.startSession()
-r = webSupport.get(url)
+WebSupport.startSession()
+r = WebSupport.get(url)
 
 #Unload data
 rec = json.loads(r)
@@ -71,9 +93,12 @@ req = requests.post(url, data=webSupport.buildData(method="UPDATE", entities=rec
 print(req.text)
 '''
 
-req = webSupport.buildRequests({}, webSupport.buildRequest("world", world_name="tester"))
+req = WebSupport.buildRequests({}, WebSupport.buildRequest("world", world_name="tester"))
 print(req, end="\n*****************\n")
 
-res = requests.post(url, data={"method":"REQUEST","data":json.dumps(req)}).text
-print(webSupport.createAccount("username","pass").text)
-print(webSupport.login("username","pass").text)
+res = WebSupport.s.post(url, data={"method":"REQUEST","data":json.dumps(req)}).text
+t = time.time()
+print(WebSupport.createAccount("username","pass").text)
+print(WebSupport.login("username","pass").text)
+print(WebSupport.logout("username").text)
+print("In " + str(time.time() - t) + " seconds")
