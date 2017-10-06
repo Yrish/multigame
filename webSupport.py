@@ -48,6 +48,10 @@ class webSupport:
     def login(username, password):
         req = {"method":"LOGIN","data":json.dumps({"username":username,"password":password})}
         return requests.post(webSupport.url, data=req)
+
+    def createAccount(username, password):
+        req = {"method":"CREATEACCOUNT", "data":json.dumps({"username":username,"password":password})}
+        return requests.post(webSupport.url, data=req)
         
 
 url = 'https://python-brysen.c9users.io/'
@@ -71,4 +75,5 @@ req = webSupport.buildRequests({}, webSupport.buildRequest("world", world_name="
 print(req, end="\n*****************\n")
 
 res = requests.post(url, data={"method":"REQUEST","data":json.dumps(req)}).text
-print(webSupport.login("user","pass").text)
+print(webSupport.createAccount("username","pass").text)
+print(webSupport.login("username","pass").text)
