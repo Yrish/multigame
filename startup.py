@@ -1,5 +1,6 @@
 from handler import Handler
 from display import Display
+from webSupport import WebSupport
 import os
 import sys
 
@@ -11,9 +12,10 @@ class StartUp:
         Handler.screen = Handler.display.screen
         Handler.sep = os.sep
         Handler.mainPath = os.getcwd() + os.sep
-        Handler.graphicPath = os.getcwd() + os.sep + "assets" + os.sep + "graphics" + os.sep
+        Handler.graphicsPath = os.getcwd() + os.sep + "assets" + os.sep + "graphics" + os.sep
         Handler.soundPath = os.getcwd() + os.sep + "assets" + os.sep + "sounds" + os.sep
         Handler.entitiesPath = Handler.mainPath + os.sep + "entities" + os.sep
+        Handler.defaultGraphicsPath = Handler.graphicsPath + "default" + os.sep
         #assign operating system
         os_type = None
         if "win" in sys.platform:

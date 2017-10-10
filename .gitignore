@@ -1,6 +1,6 @@
 *.secret
-worlds/
-assets/graphics/
-assets/sounds/
-__pycache__/
-accounts/
+worlds/*
+assets/graphics/gets/*
+assets/sounds/*
+__pycache__/*
+accounts/*
