@@ -29,4 +29,8 @@ class Load(GameState):
 
     def loadAssets(this):
         assetManager = Handler.current_managers["Asset"]
-        assetManager.loadAsset(Handler.defaultGraphicsPath, "load_screen.png")
+        print(assetManager.loadAsset(Handler.defaultGraphicsPath, "load_screen.png"))
+
+    def render(this):
+        print(Handler.current_managers["Asset"].assets)
+        Handler.display.draw(Handler.current_managers["Asset"].assets["load_screen.png"],pre="fill")

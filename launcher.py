@@ -3,13 +3,14 @@ pygame.init()
 from handler import Handler
 from startup import StartUp
 from gameStates import Load
+from managers import GameState as GameStateManager
 
 class Launcher:
 
     def __init__(this, url):
         Handler.serverURL = url
         StartUp.setUp()
-        Load()
+        GameStateManager(Load())
 
 
 launch = Launcher("Hello World")
