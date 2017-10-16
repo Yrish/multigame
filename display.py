@@ -48,5 +48,8 @@ class Display:
             image = pygame.transform.scale(image, (kwords["width"], kwords["height"]))
         this.screen.blit(image, (kwords["x"],kwords["y"]))
 
-        def update():
-            this.screen.update()
+    def update(this):
+        pygame.display.update()
+
+    def tick(this):
+        this.width, this.height = this.screen.get_size()

@@ -19,4 +19,3 @@ print(Handler.mainPath)
 print(Handler.graphicsPath)
 print(Handler.soundPath)
 print(Handler.os_type)
-        

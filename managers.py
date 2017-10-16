@@ -1,6 +1,7 @@
 import pygame
 import os
 from handler import Handler
+import sys
 
 class Asset:
 
@@ -35,12 +36,31 @@ class Asset:
 class GameState:
 
     def __init__(this, gameState):
-        Handler.current_game_state = gameState
-        Handler.game_state_manager = this
+        Handler.currentGameState = gameState
+        Handler.gameStateManager = this
         this.startGameLoop();
+        this.running = None
 
     def startGameLoop(this):
-        while True:
-            Handler.current_game_state.tick()
-            Handler.current_game_state.render()
-    
+        Handler.currentGameState.start()
+        this.running = True
+        while this.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    this.stop()
+            Handler.display.tick()
+            Handler.currentGameState.tick()
+            Handler.currentGameState.render()
+            Handler.display.update()
+
+    def stop(this):
+        Handler.currentGameState.stop()
+        pygame.quit()
+        sys.exit()
+        quit()
+
+    def pause(this):
+        this.running = False
+
+    def resume(this):
+        this.startGameLaap()
