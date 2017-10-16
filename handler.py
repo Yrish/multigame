@@ -1,3 +1,5 @@
+from managers import Asset as AssetManager
+
 class Handler:
 
     serverURL = None
@@ -10,5 +12,7 @@ class Handler:
     def startGameState():
         pass
 
-    def switch_game_state():
+    def switch_game_state(gameState):
         current_managers = {}
+        Handler.current_managers["Asset"] = AssetManager()
+        this.current_game_state = gameState

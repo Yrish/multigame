@@ -1,6 +1,8 @@
 from managers import Asset as AssetManager
 import pygame
 from handler import Handler
+from utils import Utils
+import events as ev
 
 class GameState:
 
@@ -33,17 +35,34 @@ class Load(GameState):
         super().__init__()
         Handler.current_managers["Asset"] = AssetManager()
         this.loadAssets()
+        this.keys = ev.MapKeys()
+        this.keys.start()
 
     def loadAssets(this):
         assetManager = Handler.current_managers["Asset"]
-        print(assetManager.loadAsset(Handler.defaultGraphicsPath, "load_screen.png"))
+        assetManager.loadAsset(Handler.defaultGraphicsPath, "load_screen.png")
 
     def render(this):
-        print(Handler.current_managers["Asset"].assets)
         Handler.display.draw(Handler.current_managers["Asset"].assets["load_screen.png"],pre="fill")
+        this.keys.render()
 
     def tick(this):
-        press = pygame.key.get_pressed()
-        if press and 1 in press:
-            index = press.index(1)
-            print(str(index) + " related to: " + str(pygame.key.name(index)))
+        if this.keys.tick():
+            Handler.switch_game_state(Menue())
+
+
+class Menue(GameState):
+
+    def __init__(this):
+        super().__init__()
+        this.loadAssets()
+
+    def loadAssets(this):
+        assetManager = Handler.current_managers["Asset"]
+        assetManager.loadAsset(Handler.defaultGraphicsPath, "opening_screen.png")
+
+    def render(this):
+        Handler.display.draw(Handler.current_managers["Asset"].assets["opening_screen.png"],pre="fill")
+    
+        
+        
