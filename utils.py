@@ -1,4 +1,4 @@
-
+from managers import Asset as AssetManager
 
 class Utils:
     """
@@ -25,3 +25,7 @@ class Utils:
             except ValueError:
                 return ret
         return ret
+
+    @staticmethod
+    def newDefaultManagers():
+        return {"Asset":AssetManager()}
