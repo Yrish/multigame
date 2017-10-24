@@ -1,5 +1,6 @@
 import pygame
 
+
 class Key:
 
     def __init__(this, pressCondition, **special_info):
@@ -8,3 +9,11 @@ class Key:
 
     def isPressed(this):
         return this.pressCondition()
+
+class Handler:
+    """
+    Static class: works with user inputs
+    """
+
+
+    @staticmethod

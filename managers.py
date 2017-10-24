@@ -133,4 +133,7 @@ class ScreenObject:
     def render(this):
         for obj in this.objects:
             obj.render()
+
+    def new(this):
+        return ScreenObject()
         
