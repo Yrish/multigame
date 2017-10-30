@@ -1,4 +1,5 @@
 from handler import Handler
+import pygame
 
 class ScreenObject:
 
@@ -45,8 +46,8 @@ class ScreenObject:
 
 class Group(ScreenObject):
 
-    def __init__(this):
-        super().__init__()
+    def __init__(this, **kwords):
+        super().__init__(**kwords)
         this.objectManager = Handler.currentManagers["ScreenObjects"].new()
         this.addElements()
         this.isFocusable = False
@@ -71,3 +72,24 @@ class Window(Group):
         super().__init__()
         this.isFocusable = True
         Handler.currentManagers["ScreenObjects"].focus(this)
+
+class textBox(ScreenObject):
+
+    def __init__(this, **kwords):
+        """
+        Class: textBox
+        type: noneStatic
+        extends: ScreenObject
+
+        x = 0    x position
+        y = 0    y position
+        width = 100    width of textbox
+        height = 50    height of textbox
+        font = font    font used to display text (pygame)
+        """
+        super().__init__(**kwords)
+        this.x = kwords.get("x",0)
+        this.y = kwords.get("y",0)
+        this.width = kwords.get("width", 100)
+        this.height = kwords.get("height",50)
+        this.font = kwords.get("font", Handler.default_font)
