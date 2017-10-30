@@ -64,6 +64,7 @@ class Menue(GameState):
 
     def loadAssets(this):
         print(Handler.currentManagers["Asset"].loadAsset(Handler.defaultGraphicsPath, "opening_screen.png"))
+        input()
 
     def render(this):
         Handler.display.draw(Handler.currentManagers["Asset"].assets["opening_screen.png"],pre="fill")

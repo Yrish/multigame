@@ -17,3 +17,5 @@ class Handler:
 
 
     @staticmethod
+    def isPressed(key):
+        return False

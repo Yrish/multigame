@@ -86,6 +86,7 @@ class textBox(ScreenObject):
         width = 100    width of textbox
         height = 50    height of textbox
         font = font    font used to display text (pygame)
+        defocusOnEnter = True   defocuses the object when enter is pressed
         """
         super().__init__(**kwords)
         this.x = kwords.get("x",0)
@@ -93,3 +94,4 @@ class textBox(ScreenObject):
         this.width = kwords.get("width", 100)
         this.height = kwords.get("height",50)
         this.font = kwords.get("font", Handler.default_font)
+        this.defocusOnEnter = kwords.get("defocusOnEnter", True)

@@ -1,6 +1,7 @@
 from handler import Handler
 from display import Display
 from webSupport import WebSupport
+import pygame
 import os
 import sys
 
@@ -26,4 +27,6 @@ class StartUp:
             else:
                 os_type = "linux"
         Handler.os_type = os_type
+        Handler.pygameEvents = []
+        Handler.defaultFont = pygame.font.Font(None, 12)
         sys.path.append(Handler.entitiesPath)

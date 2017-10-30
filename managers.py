@@ -45,7 +45,8 @@ class GameState:
         Handler.currentGameState.start()
         this.running = True
         while this.running:
-            for event in pygame.event.get():
+            Handler.pygameEvents = pygame.event.get()
+            for event in Handler.pygameEvents:
                 if event.type == pygame.QUIT:
                     this.stop()
             Handler.display.tick()
