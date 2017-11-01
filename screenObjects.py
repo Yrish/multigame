@@ -1,5 +1,6 @@
 from handler import Handler
 import pygame
+import sting
 
 class ScreenObject:
 
@@ -75,6 +76,8 @@ class Window(Group):
 
 class textBox(ScreenObject):
 
+    AcceptableInputs = string.printable
+
     def __init__(this, **kwords):
         """
         Class: textBox
@@ -87,6 +90,9 @@ class textBox(ScreenObject):
         height = 50    height of textbox
         font = font    font used to display text (pygame)
         defocusOnEnter = True   defocuses the object when enter is pressed
+        command = None    command run on enter
+        string = ""    string originally displayed run as command(self)
+        clearOnEnter = False  removes text from string if true
         """
         super().__init__(**kwords)
         this.x = kwords.get("x",0)
@@ -95,3 +101,30 @@ class textBox(ScreenObject):
         this.height = kwords.get("height",50)
         this.font = kwords.get("font", Handler.default_font)
         this.defocusOnEnter = kwords.get("defocusOnEnter", True)
+        this.buf = list(kwords.get("string", ""))
+        this.clearOnEnter = kwords.get("clearOnEnter", False)
+        #data
+        this.string = this.buf
+
+    def enter(this):
+        if type(this.command).__name__ == "function":
+            this.command(this)
+        if this.clearOnEnter:
+            this.string = ""
+
+    def tick(this):
+        for event in Handler.pygameEvents:
+            if event.type == pygame.KEYDOWN and this.isFocused:
+                if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    this.enter()
+                elif event.key == pygame.K_BACKSPACE:
+                    if this.buf:
+                        this.buf.pop()
+                elif event.unicode in textBox.AcceptableInputs:
+                    this.buf.append(event.unicode)
+            #Mouse curser click
+            '''
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                this.focused = this.rect.collidepoint(event.pos)
+            '''
+        
