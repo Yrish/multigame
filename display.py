@@ -33,6 +33,10 @@ class Display:
         kwords["x"] = kwords.get("x",0)
         kwords["y"] = kwords.get("y",0)
         pre = kwords.get("pre", False)
+        if not kwords.get("width", None):
+            kwords["width"] = image.get_rect().width
+        if not kwords.get("Height", None):
+            kwords["height"] = image.get_rect().height
         if pre:
             if pre == "fill":
                 kwords["width"], kwords["height"] = this.screen.get_size()

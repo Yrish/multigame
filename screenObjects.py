@@ -1,6 +1,6 @@
 from handler import Handler
 import pygame
-import sting
+import string
 
 class ScreenObject:
 
@@ -89,6 +89,8 @@ class textBox(ScreenObject):
         width = 100    width of textbox
         height = 50    height of textbox
         font = font    font used to display text (pygame)
+        fontColor = (0,0,0)  color the font is displayed in
+        padding = 6   offset of text from perimeter
         defocusOnEnter = True   defocuses the object when enter is pressed
         command = None    command run on enter
         string = ""    string originally displayed run as command(self)
@@ -99,12 +101,16 @@ class textBox(ScreenObject):
         this.y = kwords.get("y",0)
         this.width = kwords.get("width", 100)
         this.height = kwords.get("height",50)
-        this.font = kwords.get("font", Handler.default_font)
+        this.font = kwords.get("font", Handler.defaultFont)
+        this.fontColor = kwords.get("fontColor", (255,0,0))
+        this.padding = kwords.get("padding", 6)
         this.defocusOnEnter = kwords.get("defocusOnEnter", True)
         this.buf = list(kwords.get("string", ""))
         this.clearOnEnter = kwords.get("clearOnEnter", False)
+        this.command = kwords.get("command", None)
         #data
-        this.string = this.buf
+        this.string = None
+        this.tick()
 
     def enter(this):
         if type(this.command).__name__ == "function":
@@ -113,6 +119,7 @@ class textBox(ScreenObject):
             this.string = ""
 
     def tick(this):
+        #event handling
         for event in Handler.pygameEvents:
             if event.type == pygame.KEYDOWN and this.isFocused:
                 if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
@@ -127,4 +134,19 @@ class textBox(ScreenObject):
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 this.focused = this.rect.collidepoint(event.pos)
             '''
+        new = "".join(this.buf)
+        print(new)
+        if new != this.string:
+            this.string = new
+            this.rendered = this.font.render(this.string, True, this.fontColor)
+            this.rendRect = this.rendered.get_rect(x=this.x,y=this.y)
+            if this.rendRect.width > this.width - this.padding:
+                off = this.width - (this.width - this.padding)
+                this.rendArea = pygame.Rect(off,0,this.width - this.padding, this.rendRect.height)
+            else:
+                this.rendArea = this.rendered.get_rect(topleft=(0,0))
+        #blinking
+
+    def render(this):
+        Handler.display.draw(this.rendered, x=this.x, y=this.y)
         
