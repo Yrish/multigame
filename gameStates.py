@@ -3,12 +3,11 @@ import pygame
 from handler import Handler
 from utils import Utils
 import events as ev
-from screenObjects import textBox
+from screenObjects import textInputBox
 
 class GameState:
 
     def __init__(this):
-        this.screenObjects = []
         this.entities = []
         this.background = []
         pass
@@ -63,28 +62,17 @@ class Menue(GameState):
 
     def init(this):
         this.loadAssets()
-        this.screenObjects.append(textBox(string="Hello World!"))
-        this.screenObjects[0].requestFocus()
+        Handler.currentManagers['ScreenObject'].addObject(textInputBox(string="Hello World!"), focus=True)
 
     def loadAssets(this):
         print(Handler.currentManagers["Asset"].loadAsset(Handler.defaultGraphicsPath, "opening_screen.png"))
 
     def render(this):
         Handler.display.draw(Handler.currentManagers["Asset"].assets["opening_screen.png"],pre="fill")
-        for obj in this.background:
-            obj.render()
-        for obj in this.entities:
-            obj.render()
-        for obj in this.screenObjects:
-            obj.render()
+        Handler.currentManagers["ScreenObject"].render()
 
     def tick(this):
-        for obj in this.background:
-            obj.tick()
-        for obj in this.entities:
-            obj.tick()
-        for obj in this.screenObjects:
-            obj.tick()
+        Handler.currentManagers["ScreenObject"].tick()
         
     
         

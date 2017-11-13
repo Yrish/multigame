@@ -74,7 +74,7 @@ class Window(Group):
         this.isFocusable = True
         Handler.currentManagers["ScreenObjects"].focus(this)
 
-class textBox(ScreenObject):
+class textInputBox(ScreenObject):
 
     AcceptableInputs = string.printable
 
@@ -102,7 +102,7 @@ class textBox(ScreenObject):
         this.width = kwords.get("width", 100)
         this.height = kwords.get("height",50)
         this.font = kwords.get("font", Handler.defaultFont)
-        this.fontColor = kwords.get("fontColor", (255,0,0))
+        this.fontColor = kwords.get("fontColor", (0,0,0))
         this.padding = kwords.get("padding", 6)
         this.defocusOnEnter = kwords.get("defocusOnEnter", True)
         this.buf = list(kwords.get("string", ""))
@@ -115,6 +115,8 @@ class textBox(ScreenObject):
     def enter(this):
         if type(this.command).__name__ == "function":
             this.command(this)
+        else:
+            this.removeFocus()
         if this.clearOnEnter:
             this.string = ""
 
@@ -127,7 +129,7 @@ class textBox(ScreenObject):
                 elif event.key == pygame.K_BACKSPACE:
                     if this.buf:
                         this.buf.pop()
-                elif event.unicode in textBox.AcceptableInputs:
+                elif event.unicode in textInputBox.AcceptableInputs:
                     this.buf.append(event.unicode)
             #Mouse curser click
             '''
@@ -139,14 +141,55 @@ class textBox(ScreenObject):
         if new != this.string:
             this.string = new
             this.rendered = this.font.render(this.string, True, this.fontColor)
+            '''
             this.rendRect = this.rendered.get_rect(x=this.x,y=this.y)
             if this.rendRect.width > this.width - this.padding:
                 off = this.width - (this.width - this.padding)
                 this.rendArea = pygame.Rect(off,0,this.width - this.padding, this.rendRect.height)
             else:
                 this.rendArea = this.rendered.get_rect(topleft=(0,0))
+            '''
         #blinking
 
     def render(this):
-        Handler.display.draw(this.rendered, x=this.x, y=this.y)
+        Handler.display.screen.blit(this.rendered, (this.x, this.y))
         
+
+class Box(ScreenObject):
+
+    def __init__(this, **kwords):
+        """
+Class: Box
+type: nonStatic
+extends: ScreenObject
+
+    Args:
+        x=0
+        y=0
+        width=200
+        height=100
+        padding = 8
+        margin = 8
+        textureSet=default
+        horizontalOption= None
+            fill      the width = width of window
+            center    the x = center of screen
+        VerticalOption= bottom
+            fill       the height = height of screen
+            center     the y = center of screen
+            top        the y = align to top of screen
+            bottom     the y = align to bottom of screen
+        """
+        
+        super(kwords)
+        this.x = kwords.get("x", 0)
+        this.y = kwords.get("y", 0)
+        this.width = kwords.get("width", 200)
+        this.height = kwords.get("height", 100)
+        this.textureSet = handler.currentManagers["Asset"].getBoxTexture(kwords.get("textureSet", "default"))
+
+    def render(this):
+        pass
+
+    def tick(this):
+        pass

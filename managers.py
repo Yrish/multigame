@@ -33,6 +33,30 @@ class Asset:
             return False
         return img
 
+    def loadBoxTexture(this, name):
+        if name == "default":
+            this.assets["BOX"+name] = this.__loadBoxTextures__(os.sep.join([Handler.defaultGraphicsPath,"Box"]))
+        else:
+            this.assets["BOX"+name] = this.__loadBoxTextures__(os.sep.join([Handler.graphicsPath,"Boxes",name]))
+
+
+    def __loadBoxTextures__(this, path):
+        path += os.sep
+        return {"topLeft": this.loadPNG(path, "topLeft.png"), "top": this.LoadPNG(path, "top.png"), "topRight":this.loadPNG(path, "topRight.png"),
+                "left": this.loadPNG(path, "left.png"), "middle": this.loadPNG(path, "middle.png"), "right":this.loadPNG(path, "right.png"),
+                "bottomLeft": this.loadPNG(path, "bottomLeft.png"), "bottom": this.LoadPNG(path, "bottom.png"), "bottomRight":this.loadPNG(path, "bottomRight.png")}
+
+    def getBoxTexture(this, name):
+        if not "BOX"+name in this.assets:
+            try:
+                this.loadBoxTexture(name)
+            except Exception as e:
+                if name == "default":
+                    raise e
+                return this.getBoxTexture("default")
+        return this.assets["Box" + name]
+        
+
 class GameState:
 
     def __init__(this, gameState):
@@ -115,8 +139,10 @@ class ScreenObject:
             if "isGroup" in dir(objec) and objec.isGroup:
                 return obj in objec
 
-    def addObject(this, obj):
+    def addObject(this, obj, focus=False):
         this.objects.append(obj)
+        if focus:
+            this.putFocusOn(obj)
 
     def removeObject(this, obj):
         this.objects.remove(obj)
