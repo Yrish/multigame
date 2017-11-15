@@ -168,17 +168,18 @@ extends: ScreenObject
         y=0
         width=200
         height=100
-        padding = 8
-        margin = 8
+        margin = 8   width/height away from the sides of the screen (if applicable)
         textureSet=default
-        horizontalOption= None
-            fill      the width = width of window
-            center    the x = center of screen
-        VerticalOption= bottom
-            fill       the height = height of screen
-            center     the y = center of screen
-            top        the y = align to top of screen
-            bottom     the y = align to bottom of screen
+        horizontalOption= fill
+            "fill"      the width = width of window
+            "center"    the x = center of screen
+            None
+        verticalOption= bottom
+            "fill"       the height = height of screen
+            "center"     the y = center of screen
+            "top"        the y = align to top of screen
+            "bottom"     the y = align to bottom of screen
+            None         don't do anything
         """
         
         super(kwords)
@@ -187,9 +188,68 @@ extends: ScreenObject
         this.width = kwords.get("width", 200)
         this.height = kwords.get("height", 100)
         this.textureSet = handler.currentManagers["Asset"].getBoxTexture(kwords.get("textureSet", "default"))
+        this.margin = kwords.get("margin",8)
+        this.horizontalOption = kwords.get("horizontalOption", "fill")
+        this.verticalOption = kwords.get("verticalOption", "fill")
+        this.lastWidth = 0
+        this.lastHeight = 0
+        this.rendered = pygame.Surface((this.width, this.height))
 
     def render(this):
         pass
 
     def tick(this):
-        pass
+        if Handler.display.width != this.lastWidth or Handler.display.height != this.lastHeight:
+            this.updateImage()
+
+    def updateImage(this):
+        if this.horizontalOption:
+            if this.horizontalOption == "fill":
+                this.width = Handler.display.width
+                this.x = 0
+            elif this.horizontalOption == "center":
+                this.x = Handler.display.width / 2 - this.width / 2
+        if this.verticalOption:
+            if this.verticalOption == "fill":
+                this.height = Handler.display.height
+                y = 0
+            elif this.verticalOption == "center":
+                this.y = Handler.display.height / 2 - this.height / 2
+            elif this.verticalOption == "top":
+                this.y = 0
+            elif this.verticalOption == "bottom":
+                this.y = Handler.display.height - this.height
+        this.__drawBox__()
+
+    def __drawBox__(this):
+        this.rendered = pygame.Surface((this.width, this.height))
+        xOff = this.margin
+        yOff = this.margin
+
+    def __drawPart__(dictKey,xOffmin, xOffmax, yOffmin, yOffmax, option):
+        xOff = xOffmin
+        yOff = yOffmin
+        part = this.textureSet[dictKey]
+        width, height = part.get_size()
+        if option:
+            if option == "repeat":
+                while yOff + height <= yOffmax:
+                    while xOff + width <= xOffmax:
+                        this.rendered.blit(part, (xOff, yOff))
+                        xOff += width
+                    if xOff <= xOffmax:
+                        this.rendered.blit(part, (xOff, yOff), (0,0,xOffMax-xOff,height))
+                    xOff = xOffmin
+                    yOff += height
+                if this.yOff <= yOffmax:
+                    xOff = xOffmin
+                    while xOff + width <= xOffmax:
+                        this.rendered.blit(part, (xOff, yOff), (0,0,width,yOffmax-yOff))
+                        xOff += width
+                    if xOff <= xOffmax:
+                        this.rendered.blit(part, (xOff, yOff), (0,0,xOffMax-xOff,yOffmax-yOff))
+                return
+            if option == "contain":
+                          
+        this.rendered.blit(pygame.transform.scale(part, xOffmax - xOff, yOffmax - yOff), (xOff, yOff))
+        
