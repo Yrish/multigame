@@ -1,6 +1,8 @@
 *.secret
 worlds/**
-
+assets/graphics/gets/**
 assets/sounds/**
 __pycache__/**
 accounts/**
+
+!*.keep
