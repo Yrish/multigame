@@ -42,9 +42,9 @@ class Asset:
 
     def __loadBoxTextures__(this, path):
         path += os.sep
-        return {"topLeft": this.loadPNG(path, "topLeft.png"), "top": this.LoadPNG(path, "top.png"), "topRight":this.loadPNG(path, "topRight.png"),
+        return {"topLeft": this.loadPNG(path, "topLeft.png"), "top": this.loadPNG(path, "top.png"), "topRight":this.loadPNG(path, "topRight.png"),
                 "left": this.loadPNG(path, "left.png"), "middle": this.loadPNG(path, "middle.png"), "right":this.loadPNG(path, "right.png"),
-                "bottomLeft": this.loadPNG(path, "bottomLeft.png"), "bottom": this.LoadPNG(path, "bottom.png"), "bottomRight":this.loadPNG(path, "bottomRight.png")}
+                "bottomLeft": this.loadPNG(path, "bottomLeft.png"), "bottom": this.loadPNG(path, "bottom.png"), "bottomRight":this.loadPNG(path, "bottomRight.png")}
 
     def getBoxTexture(this, name):
         if not "BOX"+name in this.assets:
@@ -54,7 +54,7 @@ class Asset:
                 if name == "default":
                     raise e
                 return this.getBoxTexture("default")
-        return this.assets["Box" + name]
+        return this.assets["BOX" + name]
         
 
 class GameState:

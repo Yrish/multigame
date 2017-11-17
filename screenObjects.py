@@ -100,7 +100,6 @@ class textInputBox(ScreenObject):
         this.x = kwords.get("x",0)
         this.y = kwords.get("y",0)
         this.width = kwords.get("width", 100)
-        this.height = kwords.get("height",50)
         this.font = kwords.get("font", Handler.defaultFont)
         this.fontColor = kwords.get("fontColor", (0,0,0))
         this.padding = kwords.get("padding", 6)
@@ -108,6 +107,9 @@ class textInputBox(ScreenObject):
         this.buf = list(kwords.get("string", ""))
         this.clearOnEnter = kwords.get("clearOnEnter", False)
         this.command = kwords.get("command", None)
+        this.height = kwords.get("height", this.font.render("Hj", True, this.fontColor).get_rect().height)
+        print(this.height)
+        this.box = Box(x=this.x, y=this.y, width=this.width + this.padding * 2, height=this.height, callOption="heightOfCenter", margin=0)
         #data
         this.string = None
         this.tick()
@@ -150,9 +152,11 @@ class textInputBox(ScreenObject):
                 this.rendArea = this.rendered.get_rect(topleft=(0,0))
             '''
         #blinking
+        this.box.tick()
 
     def render(this):
-        Handler.display.screen.blit(this.rendered, (this.x, this.y))
+        Handler.display.screen.blit(this.rendered, (this.x + this.padding, this.y + this.padding))
+        this.box.render()
         
 
 class Box(ScreenObject):
@@ -180,27 +184,40 @@ extends: ScreenObject
             "top"        the y = align to top of screen
             "bottom"     the y = align to bottom of screen
             None         don't do anything
+        callOption = None
+            "heightOfCenter"    the height is interpreted as the height of the middle of the box
         """
         
-        super(kwords)
+        super().__init__(**kwords)
         this.x = kwords.get("x", 0)
         this.y = kwords.get("y", 0)
+        if kwords.get("width", False):
+            kwords["horizontalOption"] = None
+        if kwords.get("height", False):
+            kwords["verticalOption"] = None
         this.width = kwords.get("width", 200)
         this.height = kwords.get("height", 100)
-        this.textureSet = handler.currentManagers["Asset"].getBoxTexture(kwords.get("textureSet", "default"))
+        this.textureSet = Handler.currentManagers["Asset"].getBoxTexture(kwords.get("textureSet", "default"))
         this.margin = kwords.get("margin",8)
         this.horizontalOption = kwords.get("horizontalOption", "fill")
         this.verticalOption = kwords.get("verticalOption", "fill")
         this.lastWidth = 0
         this.lastHeight = 0
-        this.rendered = pygame.Surface((this.width, this.height))
+        if kwords.get("callOption", None):
+            if kwords["callOption"] == "heightOfCenter":
+                print(dir(this.textureSet["top"].get_rect()))
+                this.height += 2 * this.textureSet["top"].get_rect().height
+        this.rendered = this.__newSurface__(this.width, this.height)
+        this.tick()
 
     def render(this):
-        pass
+        Handler.display.screen.blit(this.rendered.convert_alpha(), (this.x, this.y))
 
     def tick(this):
         if Handler.display.width != this.lastWidth or Handler.display.height != this.lastHeight:
             this.updateImage()
+            this.lastWidth = Handler.display.width
+            this.lastHeight = Handler.display.height
 
     def updateImage(this):
         if this.horizontalOption:
@@ -219,17 +236,50 @@ extends: ScreenObject
                 this.y = 0
             elif this.verticalOption == "bottom":
                 this.y = Handler.display.height - this.height
-        this.__drawBox__()
+        this.__drawBox__("repeat")
 
-    def __drawBox__(this):
-        this.rendered = pygame.Surface((this.width, this.height))
+    def __newSurface__(this, width, height):
+        return pygame.Surface((width, height), pygame.SRCALPHA, 32).convert_alpha()
+
+    def __drawBox__(this, option):
+        this.rendered = this.__newSurface__(this.width, this.height)
+        sWidth, sHeight = (this.width, this.height)#this.rendered.get_size()
         xOff = this.margin
         yOff = this.margin
+        width, height = this.textureSet["topLeft"].get_size()
+        this.__drawPart__("topLeft", xOff, xOff + width, yOff, yOff + height, "fill")
+        xOff += width
+        width, height = this.textureSet["top"].get_size()
+        this.__drawPart__("top",xOff, sWidth - xOff, yOff, yOff + height, option)
+        xOff = sWidth - xOff
+        width, height = this.textureSet["topRight"].get_size()
+        this.__drawPart__("topRight", xOff, xOff + width, yOff, yOff + height, "fill")
+        yOff += height
+        xOff = this.margin
+        width, height = this.textureSet["left"].get_size()
+        this.__drawPart__("left", xOff, xOff + width, yOff, sHeight - yOff, option)
+        xOff += width
+        width, height = this.textureSet["middle"].get_size()
+        this.__drawPart__("middle",xOff, sWidth - xOff, yOff, sHeight - yOff, option)
+        xOff = sWidth - xOff
+        width, height = this.textureSet["right"].get_size()
+        this.__drawPart__("right", xOff, xOff + width, yOff, sHeight - yOff, option)
+        yOff = sHeight - yOff
+        xOff = this.margin
+        width, height = this.textureSet["bottomLeft"].get_size()
+        this.__drawPart__("bottomLeft", xOff, xOff + width, yOff, yOff + height, "fill")
+        xOff += width
+        width, height = this.textureSet["bottom"].get_size()
+        this.__drawPart__("bottom",xOff, sWidth - xOff, yOff, yOff + height, option)
+        xOff = sWidth - xOff
+        width, height = this.textureSet["bottomRight"].get_size()
+        this.__drawPart__("bottomRight", xOff, xOff + width, yOff, yOff + height, "fill")
+        
 
-    def __drawPart__(dictKey,xOffmin, xOffmax, yOffmin, yOffmax, option):
+    def __drawPart__(this, dictKey,xOffmin, xOffmax, yOffmin, yOffmax, option):
         xOff = xOffmin
         yOff = yOffmin
-        part = this.textureSet[dictKey]
+        part = this.textureSet[dictKey].convert_alpha()
         width, height = part.get_size()
         if option:
             if option == "repeat":
@@ -238,18 +288,43 @@ extends: ScreenObject
                         this.rendered.blit(part, (xOff, yOff))
                         xOff += width
                     if xOff <= xOffmax:
-                        this.rendered.blit(part, (xOff, yOff), (0,0,xOffMax-xOff,height))
+                        this.rendered.blit(part, (xOff, yOff), (0,0,xOffmax-xOff,height))
                     xOff = xOffmin
                     yOff += height
-                if this.yOff <= yOffmax:
+                if yOff <= yOffmax:
                     xOff = xOffmin
                     while xOff + width <= xOffmax:
                         this.rendered.blit(part, (xOff, yOff), (0,0,width,yOffmax-yOff))
                         xOff += width
                     if xOff <= xOffmax:
-                        this.rendered.blit(part, (xOff, yOff), (0,0,xOffMax-xOff,yOffmax-yOff))
+                        this.rendered.blit(part, (xOff, yOff), (0,0,xOffmax-xOff,yOffmax-yOff))
                 return
-            if option == "contain":
-                          
-        this.rendered.blit(pygame.transform.scale(part, xOffmax - xOff, yOffmax - yOff), (xOff, yOff))
+            if option == "fullRepeat":
+                hrep = float(yOffmax - yOffmin) / height
+                wrep = float(xOffmax - xOffmin) / width
+                print("".join(["height: ",str(height),"\nwidth: ",str(width),"\nhrep: ",str(hrep),"\nwrep: ",str(wrep)])) 
+                if hrep - int(hrep) > 0.5:
+                    hrep = int(hrep) + 1
+                else:
+                    hrep = int(hrep)
+                if wrep - int(wrep) > 0.5:
+                    wrep = int(wrep) + 1
+                else:
+                    wrep = int(wrep)
+                if not (wrep and hrep):
+                    return
+                height = (yOffmax - yOffmin) / hrep
+                width = (xOffmax - xOffmin) / wrep
+                hcount = 0
+                xcount = 0
+                while hcount < hrep:
+                    xOff = xOffmin
+                    hcount += 1
+                    xcount = 0
+                    while xcount < wrep:
+                        xcount += 1
+                        this.rendered.blit(pygame.transform.scale(part, (int(width), int(height))), (xOff,yOff))
+                        xOff += width
+                    yOff += height
+        this.rendered.blit(pygame.transform.scale(part, (int(xOffmax - xOff), int(yOffmax - yOff))), (xOff, yOff))
         
