@@ -45,6 +45,9 @@ class ScreenObject:
             return True
         return False
 
+    def __newSurface__(this, width, height):
+        return pygame.Surface((width, height), pygame.SRCALPHA, 32).convert_alpha()
+
 class Group(ScreenObject):
 
     def __init__(this, **kwords):
@@ -155,7 +158,16 @@ class textInputBox(ScreenObject):
         this.box.tick()
 
     def render(this):
-        Handler.display.screen.blit(this.rendered, (this.x + this.padding, this.y + this.padding))
+        xOff, yOff = this.rendered.get_size()
+        if (xOff > this.width):
+            xOff = xOff - this.width
+        else:
+            xOff = 0
+        if (yOff > this.height):
+            yOff = yOff - this.height
+        else:
+            yOff = 0
+        Handler.display.screen.blit(this.rendered, (this.x + this.padding, this.y + this.padding), (xOff,yOff,this.width, this.height))
         this.box.render()
         
 
@@ -203,6 +215,8 @@ extends: ScreenObject
         this.verticalOption = kwords.get("verticalOption", "fill")
         this.lastWidth = 0
         this.lastHeight = 0
+        this.lastBoxWidth = this.width
+        this.lastBoxHeight = this.height
         if kwords.get("callOption", None):
             if kwords["callOption"] == "heightOfCenter":
                 print(dir(this.textureSet["top"].get_rect()))
@@ -214,7 +228,7 @@ extends: ScreenObject
         Handler.display.screen.blit(this.rendered.convert_alpha(), (this.x, this.y))
 
     def tick(this):
-        if Handler.display.width != this.lastWidth or Handler.display.height != this.lastHeight:
+        if Handler.display.width != this.lastWidth or Handler.display.height != this.lastHeight or this.width != this.lastBoxWidth or this.height != this.lastBoxHeight:
             this.updateImage()
             this.lastWidth = Handler.display.width
             this.lastHeight = Handler.display.height
@@ -327,4 +341,119 @@ extends: ScreenObject
                         xOff += width
                     yOff += height
         this.rendered.blit(pygame.transform.scale(part, (int(xOffmax - xOff), int(yOffmax - yOff))), (xOff, yOff))
+
+class Label(ScreenObject):
+
+    def __init__(this, **kwords):
+        super().__init__(**kwords)
+        """
+    class: Label
+    type: nonstatic
+    extends: ScreenObject
+
+    Args (key words):
+        string=""   the string to display
+        x=0         x position of draw
+        y=0         y position of draw
+        interpretX="left"
+            "left"  x is interpreted as the far left x position
+            "right" x is interpreted as the far right x position
+        interpretY="top"
+            "top"     y is interpreted as the top of the label
+            "bottom"  y is interpreted as the bottom of the label
+        width="auto"
+            "auto"    width extends as far as necesary to fit text
+            numeric   a number of pixels which the label extends
+        height="auto"
+            "auto"   height extends as far as necessary to fit text
+            numeric  a number of pixels which the label extends down
+        font=Handler.defaultFont
+        fontColor = (0,0,0)
+        """
+        this.string = kwords.get("string", "")
+        this.x = kwords.get("x", 0)
+        this.y = kwords.get("y", 0)
+        this.interpretX = kwords.get("interpretX", "left")
+        this.interpretY = kwords.get("interpretY", "top")
+        this.width = kwords.get("width", "auto")
+        this.height = kwords.get("height", "auto")
+        this.font = kwords.get("font",Handler.defaultFont)
+        this.fontColor = kwords.get("fontColor", (0,0,0))
+        this.lastString = None
+        this.rendered = this.__newSurface__(10,10)
+        this.aWidth = 0
+        this.aHeight = 0
+        this.tick()
+
+    def tick(this):
+        if this.string != this.lastString:
+            this.updateRender()
+
+    def updateRender(this):
+        renderedString = this.font.render(this.string, True, this.fontColor).convert_alpha()
+        if this.width == "auto":
+            width = renderedString.get_rect().width
+        else:
+            width = this.width
+        if this.height == "auto":
+            height = renderedString.get_rect().height
+        else:
+            height = this.height
+        this.aWidth = width
+        this.aHeight = height
+        this.rendered = this.__newSurface__(width, height)
+        this.rendered.blit(renderedString, (0,0), (0,0,width,height))
+        
+
+    def render(this, **kwords):
+        surface = kwords.get("surface", Handler.display.screen)
+        x = this.x
+        y = this.y
+        if this.interpretX == "right":
+            x -= this.aWidth
+        if this.interpretY == "bottom":
+            y -= this.aHeight
+        surface.blit(this.rendered, (x,y))
+
+class Button(ScreenObject):
+
+    def __init__(this, **kwords):
+        """
+    class: Button
+    type: nonStatic
+    extends: ScreenObject
+
+    args (keyword):
+        necessary args:
+            pressComand=function  command called when pressed (called as function(caller, *positionalArgs, **kwordArgs)
+        string=""
+        x=0
+        y=0
+        interpretX="left"
+            "left"  x is interpreted as the far left x position
+            "right" x is interpreted as the far right x position
+        interpretY="top"
+            "top"     y is interpreted as the top of the label
+            "bottom"  y is interpreted as the bottom of the label
+        font=Handler.defaultFont
+        fontColor=(0,0,0)
+        padding = 8   the amount of pixels between the text and the box
+        this.positionalArgs=()
+        this.kwordArgs={}
+        """
+        super().__init__(**kowrds)
+        if not "pressCommand" in kwords:
+            raise
+        this.x = kwords.get("x",0)
+        this.y = kwords.get("y",0)
+        this.interpretX = kwords.get("interpretX", "left")
+        this.interpretY = kwords.get("interpretY", "top")
+        this.string = kwords.get("string","")
+        this.font = kwords.get("font", Handler.defaultFont)
+        this.fontColor= kwords.get("fontColor", (0,0,0))
+        this.padding = kwords.get("padding",*)
+        this.positionalArgs = kwords.get("positionalArgs", ())
+        this.kwordArgs = kwords.get("kwordArgs", {})
+        this.label = Label(string=this.string, font=this.font, fontColor=this.fontColor, x=this.x + this.padding, y=this.y+this.padding)
+        this.box = Box(x=this.x, y=this.y,width=this.label.rendered.get_rect().width + 2*this.padding,height=this.label.rendered.get_rect().height + 2*this.padding)
         
