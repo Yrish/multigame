@@ -441,9 +441,11 @@ class Button(ScreenObject):
         this.positionalArgs=()
         this.kwordArgs={}
         """
-        super().__init__(**kowrds)
+        super().__init__(**kwords)
         if not "pressCommand" in kwords:
-            raise
+            raise ValueError("keyword argument \"pressCommand\" must be defined")
+        if type(kwords["pressCommand"]) != 'function':
+            raise TypeError('argument for keywords \"pressCommand\" must be of type \'function\'')
         this.x = kwords.get("x",0)
         this.y = kwords.get("y",0)
         this.interpretX = kwords.get("interpretX", "left")
@@ -451,9 +453,14 @@ class Button(ScreenObject):
         this.string = kwords.get("string","")
         this.font = kwords.get("font", Handler.defaultFont)
         this.fontColor= kwords.get("fontColor", (0,0,0))
-        this.padding = kwords.get("padding",*)
+        this.padding = kwords.get("padding",8)
         this.positionalArgs = kwords.get("positionalArgs", ())
         this.kwordArgs = kwords.get("kwordArgs", {})
         this.label = Label(string=this.string, font=this.font, fontColor=this.fontColor, x=this.x + this.padding, y=this.y+this.padding)
         this.box = Box(x=this.x, y=this.y,width=this.label.rendered.get_rect().width + 2*this.padding,height=this.label.rendered.get_rect().height + 2*this.padding)
         
+    def tick(this):
+        pass
+
+    def render(this, **kwords):
+        pass
