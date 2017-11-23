@@ -1,6 +1,7 @@
 from handler import Handler
 import pygame
 import string
+from time import time
 
 class ScreenObject:
 
@@ -30,7 +31,10 @@ class ScreenObject:
     def tick(this):
         pass
 
-    def render(this):
+    def hasFocus(this):
+        return this.isFocused
+
+    def render(this, **kwords):
         pass
 
     def requestFocus(this):
@@ -52,7 +56,8 @@ class Group(ScreenObject):
 
     def __init__(this, **kwords):
         super().__init__(**kwords)
-        this.objectManager = Handler.currentManagers["ScreenObjects"].new()
+        print(Handler.currentManagers.keys())
+        this.objectManager = Handler.currentManagers["ScreenObject"].new()
         this.addElements()
         this.isFocusable = False
         this.isGroup = True
@@ -60,7 +65,7 @@ class Group(ScreenObject):
     def tick(this):
         this.objectManager.tick()
 
-    def render(this):
+    def render(this, **kwords):
         if (this.isVisable):
             this.objectManager.render()
 
@@ -70,12 +75,63 @@ class Group(ScreenObject):
     def __contains__(this, obj):
         return obj in this.objectManager
 
+    def focusNext(this):
+        return this.objectManager.focusNext()
+
 class Window(Group):
 
-    def __init__(this):
+    def __init__(this, **kwords):
+        """
+Class: Window
+type: nonStatic
+extends: ScreenObject
+
+    Args:
+        x=0
+        y=0
+        width=200
+        height=100
+        margin = 8   width/height away from the sides of the screen (if applicable)
+        textureSet=default
+        horizontalOption= fill
+            "fill"      the width = width of window
+            "center"    the x = center of screen
+            None
+        verticalOption= bottom
+            "fill"       the height = height of screen
+            "center"     the y = center of screen
+            "top"        the y = align to top of screen
+            "bottom"     the y = align to bottom of screen
+            None         don't do anything
+        callOption = None
+            "heightOfCenter"    the height is interpreted as the height of the middle of the box
+
+        objects = []
+        """
         super().__init__()
+        this.objectManager.objects = kwords.get("objects", [])
+        if len(this.objectManager.objects) > 0:
+            this.objectManager.focus(this.objectManager.objects[0])
         this.isFocusable = True
-        Handler.currentManagers["ScreenObjects"].focus(this)
+        this.box = Box(**kwords)
+
+    def render(this, **kwords):
+        t1 = time()
+        surface = kwords.get("surface", Handler.display.screen)
+        insetDimensions = this.box.insetDimensions()
+        insetSurface = this.__newSurface__(insetDimensions["width"], insetDimensions["height"])
+        for objec in this.objectManager.objects:
+            objec.render(surface=insetSurface)
+        this.box.render(rendered = this.box.renderedCopy, surface = surface)
+        surface.blit(insetSurface, (insetDimensions['x'], insetDimensions['y']))
+        print("rendered in: " + str(time() - t1))
+
+    def tick(this):
+        t1 = time()
+        this.box.tick()
+        print("ticked in: " + str(time() - t1))
+        for objec in this.objectManager.objects:
+            objec.tick()
 
 class textInputBox(ScreenObject):
 
@@ -121,7 +177,7 @@ class textInputBox(ScreenObject):
         if type(this.command).__name__ == "function":
             this.command(this)
         else:
-            this.removeFocus()
+            Handler.currentManagers["ScreenObject"].focusNext()
         if this.clearOnEnter:
             this.string = ""
 
@@ -157,7 +213,8 @@ class textInputBox(ScreenObject):
         #blinking
         this.box.tick()
 
-    def render(this):
+    def render(this, **kwords):
+        surface = kwords.get("surface", Handler.display.screen)
         xOff, yOff = this.rendered.get_size()
         if (xOff > this.width):
             xOff = xOff - this.width
@@ -167,8 +224,8 @@ class textInputBox(ScreenObject):
             yOff = yOff - this.height
         else:
             yOff = 0
-        Handler.display.screen.blit(this.rendered, (this.x + this.padding, this.y + this.padding), (xOff,yOff,this.width, this.height))
-        this.box.render()
+        surface.blit(this.rendered, (this.x + this.padding, this.y + this.padding), (xOff,yOff,this.width, this.height))
+        this.box.render(**kwords)
         
 
 class Box(ScreenObject):
@@ -219,19 +276,24 @@ extends: ScreenObject
         this.lastBoxHeight = this.height
         if kwords.get("callOption", None):
             if kwords["callOption"] == "heightOfCenter":
-                print(dir(this.textureSet["top"].get_rect()))
                 this.height += 2 * this.textureSet["top"].get_rect().height
         this.rendered = this.__newSurface__(this.width, this.height)
+        this.renderedCopy = this.rendered.copy()
         this.tick()
 
-    def render(this):
-        Handler.display.screen.blit(this.rendered.convert_alpha(), (this.x, this.y))
+    def render(this, **kwords):
+        surface = kwords.get("surface", Handler.display.screen)
+        rendered = kwords.get("rendered", this.rendered)
+        surface.blit(rendered.convert_alpha(), (this.x, this.y))
 
     def tick(this):
         if Handler.display.width != this.lastWidth or Handler.display.height != this.lastHeight or this.width != this.lastBoxWidth or this.height != this.lastBoxHeight:
             this.updateImage()
+            this.lastBoxWidth = this.width
+            this.lastBoxHeight = this.height
             this.lastWidth = Handler.display.width
             this.lastHeight = Handler.display.height
+        this.renderedCopy = this.rendered
 
     def updateImage(this):
         if this.horizontalOption:
@@ -254,6 +316,9 @@ extends: ScreenObject
 
     def __newSurface__(this, width, height):
         return pygame.Surface((width, height), pygame.SRCALPHA, 32).convert_alpha()
+
+    def insetDimensions(this):
+        return {"x":this.x + this.margin + this.textureSet["topLeft"].get_rect().width, "y": this.y + this.margin + this.textureSet["topLeft"].get_rect().height, "width":this.width - 2 * this.margin - 2 * this.textureSet["topLeft"].get_rect().width, "height":this.height - 2 * this.margin - 2 * this.textureSet["topLeft"].get_rect().height}
 
     def __drawBox__(this, option):
         this.rendered = this.__newSurface__(this.width, this.height)
@@ -407,13 +472,14 @@ class Label(ScreenObject):
 
     def render(this, **kwords):
         surface = kwords.get("surface", Handler.display.screen)
+        rendered = kwords.get("rendered", this.rendered)
         x = this.x
         y = this.y
         if this.interpretX == "right":
             x -= this.aWidth
         if this.interpretY == "bottom":
             y -= this.aHeight
-        surface.blit(this.rendered, (x,y))
+        surface.blit(rendered, (x,y))
 
 class Button(ScreenObject):
 

@@ -3,7 +3,7 @@ import pygame
 from handler import Handler
 from utils import Utils
 import events as ev
-from screenObjects import textInputBox
+from screenObjects import textInputBox, Window
 
 class GameState:
 
@@ -62,7 +62,7 @@ class Menue(GameState):
 
     def init(this):
         this.loadAssets()
-        Handler.currentManagers['ScreenObject'].addObject(textInputBox(string="Hello World!"), focus=True)
+        Handler.currentManagers['ScreenObject'].addObject(Window(objects=[textInputBox(string="Hello World!"),textInputBox(string="Hello World!",x=0,y=200)]), focus=True)
 
     def loadAssets(this):
         print(Handler.currentManagers["Asset"].loadAsset(Handler.defaultGraphicsPath, "opening_screen.png"))

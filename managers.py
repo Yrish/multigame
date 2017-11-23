@@ -107,14 +107,21 @@ class ScreenObject:
     def removeFocus(this):
         this.isFocused = False
 
+    def hasFocus(this):
+        if this.isFocused:
+            return True
+        for objec in this.objects:
+            if objec.hasFocus:
+                return True
+        return False
+
     def removeAllFocus(this):
         for objec in this.objects:
             if objec.isFocused:
                 if not objec.removeFocus():
                     return False
                 if "isGroup" in dir(objec) and objec.isGroup:
-                    if obj in objec:
-                        objec.objectManager.removeAllFocus()
+                    objec.objectManager.removeAllFocus()
 
     def putFocusOn(this, obj):
         if obj in this:
@@ -130,6 +137,20 @@ class ScreenObject:
             this.removeAllFocus()
             return this.putFocusOn(obj)
         return False
+
+    def getFocusedObject(this):
+        for objec in this.objects:
+            if objec.isFocused:
+                if "isGroup" in dir(objec) and objec.isGroup:
+                    return objec.objectManager.getFocusedObject()
+                return objec
+
+    def hasFocusedObject(this):
+        for objec in this.objects:
+            if objec.isFocused:
+                if "isGroup" in dir(objec) and objec.isGroup:
+                    return objec.objectManager.hasFocusedObject()
+                return True
             
 
     def __contains__(this, obj):
@@ -163,4 +184,18 @@ class ScreenObject:
 
     def new(this):
         return ScreenObject()
-        
+
+    def focusNext(this):
+        for i, objec in enumerate(this.objects):
+            if "isGroup" in dir(objec) and objec.isGroup and objec.hasFocus():
+                if objec.focusNext():
+                    return True
+                continue
+            if objec.hasFocus():
+                objec.removeFocus()
+                focusIndex = i + 1
+                if focusIndex >= len(this.objects):
+                    focusIndex = 0
+                Handler.currentManagers["ScreenObject"].focus(objec)
+                return True
+        return False
