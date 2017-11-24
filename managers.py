@@ -66,6 +66,7 @@ class GameState:
         this.running = None
 
     def startGameLoop(this):
+        Handler.tickID = 0
         Handler.currentGameState.start()
         this.running = True
         while this.running:
@@ -74,6 +75,7 @@ class GameState:
                 if event.type == pygame.QUIT:
                     this.stop()
             Handler.display.tick()
+            Handler.tickID += 1
             Handler.currentGameState.tick()
             Handler.currentGameState.render()
             Handler.display.update()
@@ -100,6 +102,7 @@ class ScreenObject:
     def __init__(this):
         this.isFocused = True
         this.objects = []
+        this.lastNext = -1
 
     def requestFocus(this):
         this.isFocused = True
@@ -130,11 +133,13 @@ class ScreenObject:
                     return obj.requestFocus()
                 if "isGroup" in dir(objec) and objec.isGroup:
                     if obj in objec:
-                        objec.objectManager.putFocusOn(obj)
+                        return objec.objectManager.putFocusOn(obj)
+        return False
 
     def focus(this, obj):
-        if obj in this:
-            this.removeAllFocus()
+        if obj in this.objects:
+            for obj in this.objects:
+                obj.removeFocus();
             return this.putFocusOn(obj)
         return False
 
@@ -186,6 +191,10 @@ class ScreenObject:
         return ScreenObject()
 
     def focusNext(this):
+        print("Focusing Next")
+        if this.lastNext == Handler.tickID:
+            return False
+        this.lastNext = Handler.tickID
         for i, objec in enumerate(this.objects):
             if "isGroup" in dir(objec) and objec.isGroup and objec.hasFocus():
                 if objec.focusNext():
@@ -196,6 +205,7 @@ class ScreenObject:
                 focusIndex = i + 1
                 if focusIndex >= len(this.objects):
                     focusIndex = 0
-                Handler.currentManagers["ScreenObject"].focus(objec)
+                Handler.currentManagers["ScreenObject"].putFocusOn(this.objects[focusIndex])
+                print("Found: " + str(objec) + "@ index " + str(i) + " moving to " + str(this.objects[focusIndex]) + "@ index " + str(focusIndex))
                 return True
         return False

@@ -26,6 +26,38 @@ class ScreenObject:
         this.isPersistant = kwords.get("isPersistant", False)
         this.isVisable = kwords.get("isVisable", True)
         this.isGroup = False
+        this.origX = kwords.get("x", None)
+        this.origY = kwords.get("y", None)
+        this.origWidth = kwords.get("width", None)
+        this.origHeight = kwords.get("height", None)
+        this.x = kwords.get("x", 0)
+        this.y = kwords.get("y", 0)
+        this.width = kwords.get("width", 0)
+        this.height = kwords.get("height", 0)
+
+    def getX(this):
+        return this.x
+
+    def getY(this):
+        return this.y
+
+    def getWidth(this):
+        return this.width
+
+    def getHeight(this):
+        return this.height
+
+    def setX(this, value):
+        this.x = value
+
+    def setY(this, value):
+        this.y = value
+
+    def setWidth(this, value):
+        this.width = value
+
+    def setHeight(this, value):
+        this.height = value
         
 
     def tick(this):
@@ -59,7 +91,7 @@ class Group(ScreenObject):
         print(Handler.currentManagers.keys())
         this.objectManager = Handler.currentManagers["ScreenObject"].new()
         this.addElements()
-        this.isFocusable = False
+        this.isFocusable = True
         this.isGroup = True
 
     def tick(this):
@@ -85,6 +117,7 @@ class Window(Group):
 Class: Window
 type: nonStatic
 extends: ScreenObject
+Args -> box
 
     Args:
         x=0
@@ -107,18 +140,31 @@ extends: ScreenObject
             "heightOfCenter"    the height is interpreted as the height of the middle of the box
 
         objects = []
+        padding = 8    The amount of autopadding between objects
+        focusIndexValue = 0   The default object to focus
         """
-        super().__init__()
+        super().__init__(**kwords)
         this.objectManager.objects = kwords.get("objects", [])
-        if len(this.objectManager.objects) > 0:
-            this.objectManager.focus(this.objectManager.objects[0])
         this.isFocusable = True
+        if len(this.objectManager.objects) > 0:
+            this.objectManager.removeAllFocus()
+            print(this.objectManager.objects[kwords.get("focusIndexValue", 0)].requestFocus())
+        this.padding = kwords.get("padding", 8)
         this.box = Box(**kwords)
+        this.insetDimensions = this.box.insetDimensions()
+        for i, objec in enumerate(this.objectManager.objects):
+            if objec.origY == None:
+                if i <= 0:
+                    objec.setY(this.padding)
+                else:
+                    objecRef = this.objectManager.objects[i-1]
+                    objec.setY(objecRef.y + objecRef.getHeight() + this.padding)
 
     def render(this, **kwords):
         t1 = time()
         surface = kwords.get("surface", Handler.display.screen)
-        insetDimensions = this.box.insetDimensions()
+        this.insetDimensions = this.box.insetDimensions()
+        insetDimensions = this.insetDimensions
         insetSurface = this.__newSurface__(insetDimensions["width"], insetDimensions["height"])
         for objec in this.objectManager.objects:
             objec.render(surface=insetSurface)
@@ -172,6 +218,28 @@ class textInputBox(ScreenObject):
         #data
         this.string = None
         this.tick()
+
+    def setY(this, value):
+        this.y = value
+        this.box.setY(value)
+
+    def setX(this, value):
+        this.x = value
+        this.box.setX(value)
+
+    def setWidth(this, value):
+        this.width = value
+        this.box.setWidth(value)
+
+    def setHeight(this, value):
+        this.height = value
+        this.box.setHeight(value)
+
+    def getHeight(this):
+        return this.box.getHeight()
+
+    def getWidth(this):
+        return this.box.getWidth()
 
     def enter(this):
         if type(this.command).__name__ == "function":
@@ -437,7 +505,9 @@ class Label(ScreenObject):
         """
         this.string = kwords.get("string", "")
         this.x = kwords.get("x", 0)
+        this.origX = kwords.get("x", None)
         this.y = kwords.get("y", 0)
+        this.orgY = kwords.get("y", None)
         this.interpretX = kwords.get("interpretX", "left")
         this.interpretY = kwords.get("interpretY", "top")
         this.width = kwords.get("width", "auto")
@@ -524,7 +594,23 @@ class Button(ScreenObject):
         this.kwordArgs = kwords.get("kwordArgs", {})
         this.label = Label(string=this.string, font=this.font, fontColor=this.fontColor, x=this.x + this.padding, y=this.y+this.padding)
         this.box = Box(x=this.x, y=this.y,width=this.label.rendered.get_rect().width + 2*this.padding,height=this.label.rendered.get_rect().height + 2*this.padding)
-        
+
+    def setY(this, value):
+        this.y = value
+        this.box.setY(value)
+
+    def setX(this, value):
+        this.x = value
+        this.box.setX(value)
+
+    def setWidth(this, value):
+        this.width = value
+        this.box.setWidth(value)
+
+    def setHeight(this, value):
+        this.height = value
+        this.box.setHeight(value)
+    
     def tick(this):
         pass
 
