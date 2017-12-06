@@ -334,7 +334,7 @@ extends: ScreenObject
             kwords["verticalOption"] = None
         this.width = kwords.get("width", 200)
         this.height = kwords.get("height", 100)
-        this.textureSet = Handler.currentManagers["Asset"].getBoxTexture(kwords.get("textureSet", "default"))
+        this.textureSet = Handler.currentManagers["Asset"][kwords.get("textureSet", "BOXdefault")]
         this.margin = kwords.get("margin",8)
         this.horizontalOption = kwords.get("horizontalOption", "fill")
         this.verticalOption = kwords.get("verticalOption", "fill")
@@ -380,7 +380,7 @@ extends: ScreenObject
                 this.y = 0
             elif this.verticalOption == "bottom":
                 this.y = Handler.display.height - this.height
-        this.__drawBox__("repeat")
+        this.__drawBox__()
 
     def __newSurface__(this, width, height):
         return pygame.Surface((width, height), pygame.SRCALPHA, 32).convert_alpha()
@@ -388,39 +388,40 @@ extends: ScreenObject
     def insetDimensions(this):
         return {"x":this.x + this.margin + this.textureSet["topLeft"].get_rect().width, "y": this.y + this.margin + this.textureSet["topLeft"].get_rect().height, "width":this.width - 2 * this.margin - 2 * this.textureSet["topLeft"].get_rect().width, "height":this.height - 2 * this.margin - 2 * this.textureSet["topLeft"].get_rect().height}
 
-    def __drawBox__(this, option):
+    def __drawBox__(this, **kwords):
         this.rendered = this.__newSurface__(this.width, this.height)
         sWidth, sHeight = (this.width, this.height)#this.rendered.get_size()
         xOff = this.margin
         yOff = this.margin
+        options = this.textureSet.get("options", {})
         width, height = this.textureSet["topLeft"].get_size()
-        this.__drawPart__("topLeft", xOff, xOff + width, yOff, yOff + height, "fill")
+        this.__drawPart__("topLeft", xOff, xOff + width, yOff, yOff + height, options.get("topLeft", "fill"))
         xOff += width
         width, height = this.textureSet["top"].get_size()
-        this.__drawPart__("top",xOff, sWidth - xOff, yOff, yOff + height, option)
+        this.__drawPart__("top",xOff, sWidth - xOff, yOff, yOff + height, options.get("top", "fill"))
         xOff = sWidth - xOff
         width, height = this.textureSet["topRight"].get_size()
-        this.__drawPart__("topRight", xOff, xOff + width, yOff, yOff + height, "fill")
+        this.__drawPart__("topRight", xOff, xOff + width, yOff, yOff + height, options.get("topRight","fill"))
         yOff += height
         xOff = this.margin
         width, height = this.textureSet["left"].get_size()
-        this.__drawPart__("left", xOff, xOff + width, yOff, sHeight - yOff, option)
+        this.__drawPart__("left", xOff, xOff + width, yOff, sHeight - yOff, options.get("left","fill"))
         xOff += width
         width, height = this.textureSet["middle"].get_size()
-        this.__drawPart__("middle",xOff, sWidth - xOff, yOff, sHeight - yOff, option)
+        this.__drawPart__("middle",xOff, sWidth - xOff, yOff, sHeight - yOff, options.get("middle","fill"))
         xOff = sWidth - xOff
         width, height = this.textureSet["right"].get_size()
-        this.__drawPart__("right", xOff, xOff + width, yOff, sHeight - yOff, option)
+        this.__drawPart__("right", xOff, xOff + width, yOff, sHeight - yOff, options.get("right","fill"))
         yOff = sHeight - yOff
         xOff = this.margin
         width, height = this.textureSet["bottomLeft"].get_size()
-        this.__drawPart__("bottomLeft", xOff, xOff + width, yOff, yOff + height, "fill")
+        this.__drawPart__("bottomLeft", xOff, xOff + width, yOff, yOff + height, options.get("bottomLeft","fill"))
         xOff += width
         width, height = this.textureSet["bottom"].get_size()
-        this.__drawPart__("bottom",xOff, sWidth - xOff, yOff, yOff + height, option)
+        this.__drawPart__("bottom",xOff, sWidth - xOff, yOff, yOff + height, options.get("bottom","fill"))
         xOff = sWidth - xOff
         width, height = this.textureSet["bottomRight"].get_size()
-        this.__drawPart__("bottomRight", xOff, xOff + width, yOff, yOff + height, "fill")
+        this.__drawPart__("bottomRight", xOff, xOff + width, yOff, yOff + height, options.get("bottomRight","fill"))
         
 
     def __drawPart__(this, dictKey,xOffmin, xOffmax, yOffmin, yOffmax, option):

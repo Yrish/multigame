@@ -2,6 +2,7 @@ import pygame
 import os
 from handler import Handler
 import sys
+import json
 
 class Asset:
 
@@ -33,19 +34,41 @@ class Asset:
             return False
         return img
 
+    def __getPNG__(this, path):
+        return pygame.image.load(path)
+
     def loadBoxTexture(this, name):
         if name == "default":
-            this.assets["BOX"+name] = this.__loadBoxTextures__(os.sep.join([Handler.defaultGraphicsPath,"Box"]))
+            this.assets["BOX"+name] = this.__loadBoxTextures__(Handler.defaultGraphicsPath + "Box", "default")
         else:
-            this.assets["BOX"+name] = this.__loadBoxTextures__(os.sep.join([Handler.graphicsPath,"Boxes",name]))
+            this.assets["BOX"+name] = this.__loadBoxTextures__(os.sep.join([Handler.graphicsPath,"Boxes"], name))
 
 
-    def __loadBoxTextures__(this, path):
-        path += os.sep
+    def __loadBoxTextures__(this, path, name):
+        with open(os.sep.join([path,name + ".dat"]), "r", encoding="utf-16") as file:
+            js = json.load(file, encoding="utf-16")
+
+        ret = {}
+        ret["original"] = this.__getPNG__(os.sep.join([path,name]) + ".png")
+        ret["whole"] = ret["original"].copy()
+
+        ret.update(this.__getImagesFromJSON__(ret["whole"], js.get("cropping", {})))
+        ret["options"] = js.get("contain", {}).get("options", {})
+
+        return ret
+        '''
         return {"topLeft": this.loadPNG(path, "topLeft.png"), "top": this.loadPNG(path, "top.png"), "topRight":this.loadPNG(path, "topRight.png"),
                 "left": this.loadPNG(path, "left.png"), "middle": this.loadPNG(path, "middle.png"), "right":this.loadPNG(path, "right.png"),
                 "bottomLeft": this.loadPNG(path, "bottomLeft.png"), "bottom": this.loadPNG(path, "bottom.png"), "bottomRight":this.loadPNG(path, "bottomRight.png")}
+        '''
 
+
+    def __getImagesFromJSON__(this, wholeImage, jsonMap):
+        ret = {}
+        for key in jsonMap:
+            ret[key] = wholeImage.subsurface(jsonMap[key])
+        return ret
+    
     def getBoxTexture(this, name):
         if not "BOX"+name in this.assets:
             try:
@@ -55,6 +78,11 @@ class Asset:
                     raise e
                 return this.getBoxTexture("default")
         return this.assets["BOX" + name]
+
+    def __getitem__(this, key):
+        if key.startswith("BOX"):
+            return this.getBoxTexture(key.strip("BOX"))
+        raise KeyError("Asset Manager can not find file: '" + str(key) + "' as no prefixes were detected")
         
 
 class GameState:
