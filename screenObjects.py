@@ -593,6 +593,7 @@ class Button(ScreenObject):
         this.padding = kwords.get("padding",8)
         this.positionalArgs = kwords.get("positionalArgs", ())
         this.kwordArgs = kwords.get("kwordArgs", {})
+        this.charEnterKey = kwords.get("charEnterKey", "\n")
         this.label = Label(string=this.string, font=this.font, fontColor=this.fontColor, x=this.x + this.padding, y=this.y+this.padding)
         this.box = Box(x=this.x, y=this.y,width=this.label.rendered.get_rect().width + 2*this.padding,height=this.label.rendered.get_rect().height + 2*this.padding)
 

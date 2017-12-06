@@ -1,6 +1,7 @@
 import pygame
 import os
 from handler import Handler
+from keyHandler import Handler as KeyHandler
 import sys
 import json
 
@@ -99,6 +100,8 @@ class GameState:
         this.running = True
         while this.running:
             Handler.pygameEvents = pygame.event.get()
+            KeyHandler.tick()
+            print(KeyHandler.Pressed)
             for event in Handler.pygameEvents:
                 if event.type == pygame.QUIT:
                     this.stop()
