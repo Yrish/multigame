@@ -101,7 +101,7 @@ class GameState:
         while this.running:
             Handler.pygameEvents = pygame.event.get()
             KeyHandler.tick()
-            print(KeyHandler.Pressed)
+            print(KeyHandler.pressed)
             for event in Handler.pygameEvents:
                 if event.type == pygame.QUIT:
                     this.stop()
