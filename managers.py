@@ -42,7 +42,8 @@ class Asset:
         if name == "default":
             this.assets["BOX"+name] = this.__loadBoxTextures__(Handler.defaultGraphicsPath + "Box", "default")
         else:
-            this.assets["BOX"+name] = this.__loadBoxTextures__(os.sep.join([Handler.graphicsPath,"Boxes"], name))
+            this.assets["BOX"+name] = this.__loadBoxTextures__(Handler.defaultGraphicsPath + "Box", name)
+            #.assets["BOX"+name] = this.__loadBoxTextures__(os.sep.join([Handler.graphicsPath,"Boxes"], name))
 
 
     def __loadBoxTextures__(this, path, name):

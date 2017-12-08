@@ -63,7 +63,7 @@ class Menue(GameState):
     def init(this):
         this.loadAssets()
         Handler.currentManagers["ScreenObject"].lastNext = Handler.tickID
-        Handler.currentManagers['ScreenObject'].addObject(Window(objects=[textInputBox(string="Hello Neil!"),textInputBox(string="Hello World!")]), focus=True)
+        Handler.currentManagers['ScreenObject'].addObject(Window(objects=[textInputBox(string="Hello Neil!"),textInputBox(string="Hello World!")], textureSet="BOXredBoard"), focus=True)
 
     def loadAssets(this):
         print(Handler.currentManagers["Asset"].loadAsset(Handler.defaultGraphicsPath, "opening_screen.png"))

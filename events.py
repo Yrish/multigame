@@ -1,6 +1,7 @@
 import pygame
 from utils import Utils
 from keyHandler import Key
+from keyHandler import Handler as KeyHandler
 
 class Event:
 
@@ -31,7 +32,9 @@ class MapKeys(Event):
         pygamePress = pygame.key.get_pressed()
         if 1 in pygamePress and not this.__anyPressed__():
             index = pygamePress.index(1)
-            this.keyMap[this.order[this.currentIndex]] = Key(lambda: pygame.key.get_pressed()[index], origin="pygame", index=index)
+            key = Key(lambda: pygame.key.get_pressed()[index], this.order[this.currentIndex], origin="pygame", index=index)
+            this.keyMap[this.order[this.currentIndex]] = key
+            KeyHandler.addKey(key)
             this.currentIndex += 1
             if this.currentIndex >= len(this.order):
                 return True
@@ -47,5 +50,6 @@ class MapKeys(Event):
 
     def start(this):
         this.started = True
+        KeyHandler.clearKeys()
         this.keyMap = {}
         this.currentIndex = 0
