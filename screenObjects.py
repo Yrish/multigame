@@ -425,6 +425,7 @@ extends: ScreenObject
         
 
     def __drawPart__(this, dictKey,xOffmin, xOffmax, yOffmin, yOffmax, option):
+        print((dictKey, xOffmin, yOffmin, xOffmax, yOffmax, xOffmax - xOffmin, yOffmax - yOffmin))
         xOff = xOffmin
         yOff = yOffmin
         part = this.textureSet[dictKey].convert_alpha()
@@ -450,7 +451,9 @@ extends: ScreenObject
             if option == "fullRepeat":
                 hrep = float(yOffmax - yOffmin) / height
                 wrep = float(xOffmax - xOffmin) / width
-                print("".join(["height: ",str(height),"\nwidth: ",str(width),"\nhrep: ",str(hrep),"\nwrep: ",str(wrep)])) 
+                print("".join(["\nhrep: ",str(hrep),"\nwrep: ",str(wrep)]))
+                height = (yOffmax - yOffmin) / hrep
+                width = (xOffmax - xOffmin) / wrep
                 if hrep - int(hrep) > 0.5:
                     hrep = int(hrep) + 1
                 else:
@@ -461,19 +464,22 @@ extends: ScreenObject
                     wrep = int(wrep)
                 if not (wrep and hrep):
                     return
-                height = (yOffmax - yOffmin) / hrep
-                width = (xOffmax - xOffmin) / wrep
+                print("width:",width,"\nheight:",height)
                 hcount = 0
                 xcount = 0
                 while hcount < hrep:
                     xOff = xOffmin
-                    hcount += 1
                     xcount = 0
                     while xcount < wrep:
+                        #print(width * xcount - int(width) * xcount)
+                        this.rendered.blit(pygame.transform.scale(part, (int(width), int(height))), (xOff ,yOff))
                         xcount += 1
-                        this.rendered.blit(pygame.transform.scale(part, (int(width), int(height))), (xOff,yOff))
-                        xOff += width
-                    yOff += height
+                        xOff += int(width)
+                    if int(xOffmax) > xOff:
+                        this.rendered.blit(pygame.transform.scale(part, (int(width), int(height))).subsurface((0,0,int(xOffmax-xOff),int(height))), (xOff,yOff))
+                    yOff += int(height)
+                    hcount += 1
+                return
         this.rendered.blit(pygame.transform.scale(part, (int(xOffmax - xOff), int(yOffmax - yOff))), (xOff, yOff))
 
 class Label(ScreenObject):
