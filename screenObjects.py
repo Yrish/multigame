@@ -449,11 +449,20 @@ extends: ScreenObject
                         this.rendered.blit(part, (xOff, yOff), (0,0,xOffmax-xOff,yOffmax-yOff))
                 return
             if option == "fullRepeat":
+                fullwidth = xOffmax - xOffmin
+                fullheight = yOffmax - yOffmin
+                try:
+                    width = ((fullwidth % width) / (width % fullwidth) + 1) * width
+                except ZeroDivisionError:
+                    width = width
+                try:
+                    height = ((fullheight % height) / (height % fullheight) + 1) * height
+                except ZeroDivisionError:
+                    height = height
                 hrep = float(yOffmax - yOffmin) / height
                 wrep = float(xOffmax - xOffmin) / width
                 print("".join(["\nhrep: ",str(hrep),"\nwrep: ",str(wrep)]))
-                height = (yOffmax - yOffmin) / hrep
-                width = (xOffmax - xOffmin) / wrep
+                #width = (xOffmax - xOffmin) / wrep
                 if hrep - int(hrep) > 0.5:
                     hrep = int(hrep) + 1
                 else:
@@ -471,12 +480,9 @@ extends: ScreenObject
                     xOff = xOffmin
                     xcount = 0
                     while xcount < wrep:
-                        #print(width * xcount - int(width) * xcount)
                         this.rendered.blit(pygame.transform.scale(part, (int(width), int(height))), (xOff ,yOff))
                         xcount += 1
                         xOff += int(width)
-                    if int(xOffmax) > xOff:
-                        this.rendered.blit(pygame.transform.scale(part, (int(width), int(height))).subsurface((0,0,int(xOffmax-xOff),int(height))), (xOff,yOff))
                     yOff += int(height)
                     hcount += 1
                 return
