@@ -1,6 +1,8 @@
 import requests
 import json
 import time
+import os
+import shutil
 
 class WebSupport:
     """
@@ -33,6 +35,7 @@ class WebSupport:
     username = None
     authToken = None
     s = None
+    r = None
 
     def startSession():
         """
@@ -85,6 +88,20 @@ class WebSupport:
         if path == None:
             return "Unknown Path"
         open(str(path), "w")
+
+    def downloadFiles(iterableFileNames, downloadpath):
+        for filename in iterableFileNames:
+            print("Grabbing file: " + filename)
+            if filename.startswith("BOX"):
+                print("isBox")
+                WebSupport._downloadFile(filename, os.sep.join((downloadpath, filename[3:])))
+
+    def _downloadFile(filename, destination):
+        packet = WebSupport.__basicPacket__(method="DOWNLOAD", data=json.dumps({"filename":filename}))
+        r = WebSupport.s.post(WebSupport.url, data=packet, stream=True)
+        r.raw.decode_centent = True
+        with open(destination, "wb") as file:
+            shutil.copyfileobj(r.raw, file)
 
     def authenticate(username, password):
         """

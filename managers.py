@@ -2,6 +2,7 @@ import pygame
 import os
 from handler import Handler
 from keyHandler import Handler as KeyHandler
+from webSupport import WebSupport
 import sys
 import json
 
@@ -40,9 +41,9 @@ class Asset:
 
     def loadBoxTexture(this, name):
         if name == "default":
-            this.assets["BOX"+name] = this.__loadBoxTextures__(Handler.defaultGraphicsPath + "Box", "default")
+            this.assets["BOX"+name] = this.__loadBoxTextures__(Handler.boxPath[:-1], "default")
         else:
-            this.assets["BOX"+name] = this.__loadBoxTextures__(Handler.defaultGraphicsPath + "Box", name)
+            this.assets["BOX"+name] = this.__loadBoxTextures__(Handler.boxPath[:-1], name)
             #.assets["BOX"+name] = this.__loadBoxTextures__(os.sep.join([Handler.graphicsPath,"Boxes"], name))
 
 
@@ -71,13 +72,16 @@ class Asset:
             ret[key] = wholeImage.subsurface(jsonMap[key])
         return ret
     
-    def getBoxTexture(this, name):
+    def getBoxTexture(this, name, c=0):
         if not "BOX"+name in this.assets:
             try:
                 this.loadBoxTexture(name)
             except Exception as e:
                 if name == "default":
                     raise e
+                if c == 0:
+                    WebSupport.downloadFiles([name.join(("BOX",".png")), name.join(("BOX", ".dat"))],Handler.boxPath)
+                    return this.getBoxTexture(name, c=1)
                 return this.getBoxTexture("default")
         return this.assets["BOX" + name]
 

@@ -14,6 +14,7 @@ class StartUp:
         Handler.sep = os.sep
         Handler.mainPath = os.getcwd() + os.sep
         Handler.graphicsPath = os.getcwd() + os.sep + "assets" + os.sep + "graphics" + os.sep
+        Handler.boxPath = Handler.graphicsPath + os.sep + "box" + os.sep
         Handler.soundPath = os.getcwd() + os.sep + "assets" + os.sep + "sounds" + os.sep
         Handler.entitiesPath = Handler.mainPath + os.sep + "entities" + os.sep
         Handler.defaultGraphicsPath = Handler.graphicsPath + "default" + os.sep
@@ -30,3 +31,5 @@ class StartUp:
         Handler.pygameEvents = []
         Handler.defaultFont = pygame.font.Font(None, 25)
         sys.path.append(Handler.entitiesPath)
+        #For testing
+        WebSupport.startSession()
