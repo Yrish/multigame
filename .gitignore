@@ -1,6 +1,6 @@
 *.secret
 worlds/**
-assets/graphics/gets/**
+assets/graphics/box/**
 assets/sounds/**
 __pycache__/**
 accounts/**
@@ -9,3 +9,4 @@ accounts/**
 !assets/**/**.keep
 !**default**
 !*defaut*
+
