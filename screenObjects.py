@@ -145,6 +145,7 @@ Args -> box
         """
         super().__init__(**kwords)
         this.objectManager.objects = kwords.get("objects", [])
+        this.objectManager.objects.append(Button(string="X", pressCommand=this.close))
         this.isFocusable = True
         if len(this.objectManager.objects) > 0:
             this.objectManager.removeAllFocus()
@@ -158,7 +159,14 @@ Args -> box
                     objec.setY(this.padding)
                 else:
                     objecRef = this.objectManager.objects[i-1]
+                    print(objecRef)
+                    print(objecRef.y)
+                    print(objecRef.getHeight())
+                    print(this.padding)
                     objec.setY(objecRef.y + objecRef.getHeight() + this.padding)
+
+    def close(this):
+        Handler.objectManager.removeObject(this)
 
     def render(this, **kwords):
         t1 = time()
@@ -515,7 +523,9 @@ class Label(ScreenObject):
             numeric  a number of pixels which the label extends down
         font=Handler.defaultFont
         fontColor = (0,0,0)
+        isFocusable = False
         """
+        this.isFocusable = False
         this.string = kwords.get("string", "")
         this.x = kwords.get("x", 0)
         this.origX = kwords.get("x", None)
@@ -532,6 +542,9 @@ class Label(ScreenObject):
         this.aWidth = 0
         this.aHeight = 0
         this.tick()
+
+    def getHeight(this):
+        return this.rendered.get_rect().height
 
     def tick(this):
         if this.string != this.lastString:
@@ -593,7 +606,8 @@ class Button(ScreenObject):
         super().__init__(**kwords)
         if not "pressCommand" in kwords:
             raise ValueError("keyword argument \"pressCommand\" must be defined")
-        if type(kwords["pressCommand"]) != 'function':
+        print(kwords)
+        if type(kwords["pressCommand"]).__name__ != 'function' and type(kwords["pressCommand"]).__name__ != "method":
             raise TypeError('argument for keywords \"pressCommand\" must be of type \'function\'')
         this.x = kwords.get("x",0)
         this.y = kwords.get("y",0)
@@ -626,7 +640,25 @@ class Button(ScreenObject):
         this.box.setHeight(value)
     
     def tick(this):
-        pass
+        if this.isFocused:
+            this.label.fontColor = (255,255,255)
+        else:
+            this.label.fontColor = this.fontColor
+        this.box.tick()
+        this.label.tick()
+
+    def updateRender(this):
+        this.rendered = this.__newSurface__(this.width, this.height)
+        this.label.string = this.string
+        this.label.font = this.font
+        this.label.fontColor = this.fontColor
+        this.label.updateRender()
+        this.box.setX(this.x)
+        this.box.setY(this.y)
+        this.box.setWidth(this.label.rendered.get_rect().width + 2*this.padding)
+        this.box.setHeight(this.label.rendered.get_rect().height + 2*this.padding)
+        this.box.updateRender()
 
     def render(this, **kwords):
-        pass
+        this.box.render()
+        this.label.render()

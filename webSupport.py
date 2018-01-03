@@ -94,9 +94,18 @@ class WebSupport:
             print("Grabbing file: " + filename)
             if filename.startswith("BOX"):
                 print("isBox")
-                WebSupport._downloadFile(filename, os.sep.join((downloadpath, filename[3:])))
+                try:
+                    WebSupport._downloadFile(filename, os.sep.join((downloadpath, filename[3:])))
+                except IOError:
+                    continue
 
     def _downloadFile(filename, destination):
+        cPacket = WebSupport.__basicPacket__(method="FILEEXISTS", data=json.dumps({"filename":filename}))
+        ret = WebSupport.s.post(WebSupport.url, data=cPacket)
+        print(ret.text)
+        js = json.loads(ret.text)
+        if not js.get("status", False):
+            raise IOError("Server File existance eror: " + js.get("reason", "BAD PACKET GET"))
         packet = WebSupport.__basicPacket__(method="DOWNLOAD", data=json.dumps({"filename":filename}))
         r = WebSupport.s.post(WebSupport.url, data=packet, stream=True)
         r.raw.decode_centent = True
@@ -182,6 +191,12 @@ class WebSupport:
 
     def __basicPacket__(**kwords):
         return {"method":kwords.get("method"), "data":kwords.get("data", "{}")}
+
+
+class SeverError(Exception):
+
+    def __init__(this, message):
+        supper().__init__(message)
 
 
 '''

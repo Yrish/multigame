@@ -207,7 +207,15 @@ class ScreenObject:
             this.putFocusOn(obj)
 
     def removeObject(this, obj):
-        this.objects.remove(obj)
+        for objec in this.objects:
+            if objec == obj:
+                this.remove(obj)
+                return True
+            elif "isGroup" in dir(objec) and objec.isGroup:
+                if objec.remove(obj):
+                    return True
+        return False
+                
 
     def removeDeadObjects(this):
         for obj in this.objects:
@@ -238,9 +246,14 @@ class ScreenObject:
                 continue
             if objec.hasFocus():
                 objec.removeFocus()
-                focusIndex = i + 1
-                if focusIndex >= len(this.objects):
-                    focusIndex = 0
+                d = i
+                while True:
+                    focusIndex = d + 1
+                    if focusIndex >= len(this.objects):
+                        focusIndex = 0
+                    if this.objects[focusIndex].isFocusable:
+                        break
+                    d += 1
                 Handler.currentManagers["ScreenObject"].putFocusOn(this.objects[focusIndex])
                 print("Found: " + str(objec) + "@ index " + str(i) + " moving to " + str(this.objects[focusIndex]) + "@ index " + str(focusIndex))
                 return True
