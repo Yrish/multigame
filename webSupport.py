@@ -100,6 +100,7 @@ class WebSupport:
                     continue
 
     def _downloadFile(filename, destination):
+        print("downloading " + filename + " to " + destination)
         cPacket = WebSupport.__basicPacket__(method="FILEEXISTS", data=json.dumps({"filename":filename}))
         ret = WebSupport.s.post(WebSupport.url, data=cPacket)
         print(ret.text)
@@ -109,6 +110,8 @@ class WebSupport:
         packet = WebSupport.__basicPacket__(method="DOWNLOAD", data=json.dumps({"filename":filename}))
         r = WebSupport.s.post(WebSupport.url, data=packet, stream=True)
         r.raw.decode_centent = True
+        print("liln")
+        print(r)
         with open(destination, "wb") as file:
             shutil.copyfileobj(r.raw, file)
 

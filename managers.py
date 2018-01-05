@@ -51,6 +51,7 @@ class Asset:
         with open(os.sep.join([path,name + ".dat"]), "r", encoding="utf-16") as file:
             js = json.load(file, encoding="utf-16")
 
+        print("js:",js)
         ret = {}
         ret["original"] = this.__getPNG__(os.sep.join([path,name]) + ".png")
         ret["whole"] = ret["original"].copy()
@@ -76,12 +77,14 @@ class Asset:
         if not "BOX"+name in this.assets:
             try:
                 this.loadBoxTexture(name)
-            except Exception as e:
+            except IOError as e:
                 if name == "default":
                     raise e
                 if c == 0:
                     WebSupport.downloadFiles([name.join(("BOX",".png")), name.join(("BOX", ".dat"))],Handler.boxPath)
+                    print("downloaded: " + name)
                     return this.getBoxTexture(name, c=1)
+                print("using default, texture " + name + " not found")
                 return this.getBoxTexture("default")
         return this.assets["BOX" + name]
 
