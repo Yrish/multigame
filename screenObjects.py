@@ -2,6 +2,7 @@ from handler import Handler
 import pygame
 import string
 from time import time
+from keyHandler import Handler as KeyHandler
 
 class ScreenObject:
 
@@ -143,6 +144,8 @@ Args -> box
         padding = 8    The amount of autopadding between objects
         focusIndexValue = 0   The default object to focus
         """
+        if kwords.get("zIndex", False) == False:
+            kwords["zIndex"] = Handler.currentManagers["ScreenObject"].getMaxZIndex() + 1
         super().__init__(**kwords)
         this.objectManager.objects = kwords.get("objects", [])
         this.objectManager.objects.append(Button(string="X", pressCommand=this.close))
@@ -174,9 +177,9 @@ Args -> box
         this.insetDimensions = this.box.insetDimensions()
         insetDimensions = this.insetDimensions
         insetSurface = this.__newSurface__(insetDimensions["width"], insetDimensions["height"])
+        this.box.render(rendered = this.box.renderedCopy, surface = surface)
         for objec in this.objectManager.objects:
             objec.render(surface=insetSurface)
-        this.box.render(rendered = this.box.renderedCopy, surface = surface)
         surface.blit(insetSurface, (insetDimensions['x'], insetDimensions['y']))
         print("rendered in: " + str(time() - t1))
 
@@ -259,11 +262,11 @@ class textInputBox(ScreenObject):
 
     def tick(this):
         #event handling
+        if KeyHandler.advanceJustPressed():
+            return this.enter()
         for event in Handler.pygameEvents:
             if event.type == pygame.KEYDOWN and this.isFocused:
-                if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
-                    this.enter()
-                elif event.key == pygame.K_BACKSPACE:
+                if event.key == pygame.K_BACKSPACE:
                     if this.buf:
                         this.buf.pop()
                 elif event.unicode in textInputBox.AcceptableInputs:
@@ -640,6 +643,8 @@ class Button(ScreenObject):
         this.box.setHeight(value)
     
     def tick(this):
+        if KeyHandler.advanceJustPressed():
+            Handler.currentManagers["ScreenObject"].focusNext()
         if this.isFocused:
             this.label.fontColor = (255,255,255)
         else:

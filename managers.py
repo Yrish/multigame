@@ -11,6 +11,9 @@ class Asset:
     def __init__(this):
         this.assets = {}
 
+    def new():
+        return Asset()
+
     def loadAsset(this, path, name):
         print("loading: " + name)
         if path[-1] != os.sep:
@@ -102,6 +105,9 @@ class GameState:
         this.startGameLoop();
         this.running = None
 
+    def new():
+        return GameState()
+
     def startGameLoop(this):
         Handler.tickID = 0
         Handler.currentGameState.start()
@@ -109,7 +115,7 @@ class GameState:
         while this.running:
             Handler.pygameEvents = pygame.event.get()
             KeyHandler.tick()
-            print(KeyHandler.pressed)
+            print([str(x, encoding="utf-16").encode("utf-8") for x in KeyHandler.pressed])
             for event in Handler.pygameEvents:
                 if event.type == pygame.QUIT:
                     this.stop()
@@ -231,8 +237,13 @@ class ScreenObject:
         this.removeDeadObjects()
 
     def render(this):
-        for obj in this.objects:
+        for obj in sorted(this.objects, key=lambda obj: obj.zIndex):
             obj.render()
+
+    def getMaxZIndex(this):
+        if len(this.objects) == 0:
+            return 0
+        return max(this.objects, key=lambda obj: obj.zIndex).zIndex
 
     def new(this):
         return ScreenObject()

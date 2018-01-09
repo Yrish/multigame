@@ -22,6 +22,8 @@ class Handler:
     __staticArticulate__ = {}
     __keyPast__ = {}
     keys = {}
+    advancedTickId = 0
+    deleteChar = str(b'\x08', encoding="utf-8").encode("utf-16")
     
     @staticmethod
     def tick():
@@ -38,7 +40,7 @@ class Handler:
                     pass
         Handler.articulate = dict((key, True) for key in Handler.getPressed())
         Handler.__staticArticulate__ = dict(Handler.articulate)
-        print(Handler.isPressed("right"))
+        print(Handler.isPressed(Handler.deleteChar))
 
     @staticmethod
     def removeByValue(dictionary, value):
@@ -108,8 +110,22 @@ class Handler:
     def addKey(key):
         Handler.keys[key.key] = key
 
-    def __delitem__(this, key):
+    def __delitem__(key):
         try:
             del pressed[key]
         except KeyError:
             pass
+
+    def advanceJustPressed():
+        if (Handler.advancedTickId == overHandler.tickID):
+            return False
+        r = Handler.justPressed("\t".encode("utf-16")) or Handler.justPressed("\n".encode("utf-16")) or Handler.justPressed("\r".encode("utf-16"))
+        if r:
+            Handler.advancedTickId = overHandler.tickID
+        return r
+
+    def isAdvance(string):
+        return string == "\t".encode("utf-16") or string == "\n".encode("utf-16") or string == "\r".encode("utf-16")
+
+    def anyJustPressed(lis):
+        return any([Handler.justPressed(x) for x in lis])
