@@ -62,6 +62,20 @@ class Asset:
         ret.update(this.__getImagesFromJSON__(ret["whole"], js.get("cropping", {})))
         ret["options"] = js.get("contain", {}).get("options", {})
 
+        scale = ret["options"].get("scale", 1)
+
+        print(ret)
+
+        if scale != 1:
+            for key in ret:
+                if key == "options" or key == "original":
+                   continue
+                img = ret[key]
+                rect = img.get_rect()
+                img = pygame.transform.scale(img, (int(rect.width * scale), int(rect.height * scale)))
+                ret[key] = img
+        print(ret)
+
         return ret
         '''
         return {"topLeft": this.loadPNG(path, "topLeft.png"), "top": this.loadPNG(path, "top.png"), "topRight":this.loadPNG(path, "topRight.png"),

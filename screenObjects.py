@@ -270,7 +270,8 @@ class textInputBox(ScreenObject):
                     if this.buf:
                         this.buf.pop()
                 elif event.unicode in textInputBox.AcceptableInputs:
-                    this.buf.append(event.unicode)
+                    if not KeyHandler.isAdvance(event.unicode.encode("utf-16")):
+                        this.buf.append(event.unicode)
             #Mouse curser click
             '''
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -400,6 +401,14 @@ extends: ScreenObject
         return {"x":this.x + this.margin + this.textureSet["topLeft"].get_rect().width, "y": this.y + this.margin + this.textureSet["topLeft"].get_rect().height, "width":this.width - 2 * this.margin - 2 * this.textureSet["topLeft"].get_rect().width, "height":this.height - 2 * this.margin - 2 * this.textureSet["topLeft"].get_rect().height}
 
     def __drawBox__(this, **kwords):
+        whole = this.textureSet["whole"].get_rect()
+        print(whole)
+        if this.width < whole.width + 2*this.margin:
+            print("changed width")
+            this.width = whole.width + 2*this.margin
+        if this.height < whole.height + 2*this.margin:
+            print("changed height")
+            this.height = whole.height + 2*this.margin
         this.rendered = this.__newSurface__(this.width, this.height)
         sWidth, sHeight = (this.width, this.height)#this.rendered.get_size()
         xOff = this.margin
@@ -409,6 +418,8 @@ extends: ScreenObject
         this.__drawPart__("topLeft", xOff, xOff + width, yOff, yOff + height, options.get("topLeft", "fill"))
         xOff += width
         width, height = this.textureSet["top"].get_size()
+        print(kwords)
+        print("top",xOff, sWidth - xOff, yOff, yOff + height, options.get("top", "fill"))
         this.__drawPart__("top",xOff, sWidth - xOff, yOff, yOff + height, options.get("top", "fill"))
         xOff = sWidth - xOff
         width, height = this.textureSet["topRight"].get_size()
@@ -654,16 +665,35 @@ class Button(ScreenObject):
 
     def updateRender(this):
         this.rendered = this.__newSurface__(this.width, this.height)
+        box = this.box.rendered.get_rect()
+        size = this.rendered.get_rect()
+
+        if size.width < box.width:
+            this.width = box.width
+        if size.height < box.height:
+            this.height = box.height
+
+        this.rendered = this.__newSurface__(this.width, this.height)
+
         this.label.string = this.string
         this.label.font = this.font
         this.label.fontColor = this.fontColor
-        this.label.updateRender()
         this.box.setX(this.x)
         this.box.setY(this.y)
         this.box.setWidth(this.label.rendered.get_rect().width + 2*this.padding)
         this.box.setHeight(this.label.rendered.get_rect().height + 2*this.padding)
         this.box.updateRender()
+        this.label.setX(this.box.x + this.box.margin)
+        this.label.setY(this.box.y + this.box.margin)
+        this.label.updateRender()
 
     def render(this, **kwords):
         this.box.render()
         this.label.render()
+
+class Saver:
+
+    def __init__(this, obj, title=None):
+        if not title:
+            title = str(time()) + ".png"
+        pygame.image.save(obj.rendered, Handler.screenShotsPath + title)

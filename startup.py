@@ -18,6 +18,7 @@ class StartUp:
         Handler.soundPath = os.getcwd() + os.sep + "assets" + os.sep + "sounds" + os.sep
         Handler.entitiesPath = Handler.mainPath + os.sep + "entities" + os.sep
         Handler.defaultGraphicsPath = Handler.graphicsPath + "default" + os.sep
+        Handler.screenShotsPath = Handler.mainPath + os.sep + "ScreenShots" + os.sep
         #assign operating system
         os_type = None
         if "win" in sys.platform:

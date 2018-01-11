@@ -4,6 +4,7 @@ assets/graphics/box/**
 assets/sounds/**
 __pycache__/**
 accounts/**
+ScreenShots/**
 
 !**.keep
 !assets/**/**.keep
