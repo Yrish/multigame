@@ -19,6 +19,7 @@ class ScreenObject:
             isPersistant = False -If object should pertain focus even if requested to lose it
             isVisable = True -Renders the object
             grouping = Handler.currentManagers["Assets"] -If the objects pertains to a custom group, like a window
+            belongsTo = Handler.currentManagers["ScreenObject"]
         """
         this.zIndex = kwords.get("zIndex", 0)
         this.isAlive = kwords.get("isAlive", True)
@@ -35,6 +36,7 @@ class ScreenObject:
         this.y = kwords.get("y", 0)
         this.width = kwords.get("width", 0)
         this.height = kwords.get("height", 0)
+        this.belongsTo = kwords.get("belongsTo", Handler.currentManagers["ScreenObject"])
 
     def getX(this):
         return this.x
@@ -695,5 +697,7 @@ class Saver:
 
     def __init__(this, obj, title=None):
         if not title:
-            title = str(time()) + ".png"
+            title = "Screen_Shot_at_" + "".join(str(time()).split(".")) + ".png"
+        if not "." in title:
+            title += ".png"
         pygame.image.save(obj.rendered, Handler.screenShotsPath + title)

@@ -226,6 +226,7 @@ class ScreenObject:
 
     def addObject(this, obj, focus=False):
         this.objects.append(obj)
+        obj.belongsTo = this
         if focus:
             this.putFocusOn(obj)
 
@@ -286,3 +287,7 @@ class ScreenObject:
                 print("Found: " + str(objec) + "@ index " + str(i) + " moving to " + str(this.objects[focusIndex]) + "@ index " + str(focusIndex))
                 return True
         return False
+
+def loadDefaultManagers():
+    Handler.currentManagers["Asset"] = Asset()
+    Handler.currentManagers["ScreenObject"] = ScreenObject()

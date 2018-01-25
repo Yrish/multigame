@@ -1,4 +1,5 @@
 from managers import Asset as AssetManager
+import managers
 import pygame
 from handler import Handler
 from utils import Utils
@@ -8,6 +9,7 @@ from screenObjects import textInputBox, Window, Label, Saver, Box
 class GameState:
 
     def __init__(this):
+        managers.loadDefaultManagers()
         this.entities = []
         this.background = []
         pass
@@ -41,7 +43,7 @@ class Load(GameState):
         this.loadAssets()
         this.keys = ev.MapKeys()
         this.keys.start()
-        Saver(Box(textureSet="BOXgreen", width=500, height=400), "lol.png")
+        Saver(Box(textureSet="BOXgreen", width=500, height=400))
 
     def loadAssets(this):
         assetManager = Handler.currentManagers["Asset"]
